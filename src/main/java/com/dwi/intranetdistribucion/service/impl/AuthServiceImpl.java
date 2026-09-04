@@ -31,7 +31,7 @@ public class AuthServiceImpl implements AuthService {
     private final JwtTokenProvider jwtTokenProvider;
 
     @Override
-    @Transactional
+    @Transactional(noRollbackFor = {BadCredentialsException.class, LockedException.class})
     public JwtAuthResponseDTO login(LoginRequestDTO loginRequest) {
         Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(loginRequest.getEmail());
 
@@ -50,9 +50,8 @@ public class AuthServiceImpl implements AuthService {
                         )
                 );
 
-                // Si el login fue exitoso, reiniciamos el contador de intentos fallidos
-                usuario.setIntentosFallidos(0);
-                usuarioRepository.save(usuario);
+                // Si el login es exitoso, reiniciamos el contador
+                usuarioRepository.reiniciarIntentosFallidos(usuario.getId());
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 String token = jwtTokenProvider.generarToken(authentication);
@@ -63,16 +62,16 @@ public class AuthServiceImpl implements AuthService {
                         .build();
 
             } catch (BadCredentialsException ex) {
-                int intentos = (usuario.getIntentosFallidos() == null ? 0 : usuario.getIntentosFallidos()) + 1;
-                usuario.setIntentosFallidos(intentos);
+                // Incrementamos los intentos fallidos en la base de datos de forma persistente
+                usuarioRepository.incrementarIntentosFallidos(usuario.getId());
 
-                if (intentos >= 5) {
-                    usuario.setEsBloqueado(true);
-                    usuarioRepository.save(usuario);
+                int nuevosIntentos = (usuario.getIntentosFallidos() == null ? 0 : usuario.getIntentosFallidos()) + 1;
+
+                if (nuevosIntentos >= 5) {
+                    usuarioRepository.bloquearUsuario(usuario.getId());
                     throw new LockedException("Cuenta bloqueada. Ha superado los 5 intentos fallidos permitidos.");
                 } else {
-                    usuarioRepository.save(usuario);
-                    throw new BadCredentialsException("Credenciales incorrectas. Llevas " + intentos + " de 5 intentos.");
+                    throw new BadCredentialsException("Credenciales incorrectas. Llevas " + nuevosIntentos + " de 5 intentos.");
                 }
             }
         } else {
