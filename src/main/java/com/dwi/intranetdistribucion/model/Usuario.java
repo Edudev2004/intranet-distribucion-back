@@ -41,6 +41,10 @@ public class Usuario {
     @Column(name = "es_bloqueado")
     private Boolean esBloqueado;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "rol_id")
+    private Rol rol;
+
     @Column(name = "fecha_creacion", updatable = false)
     private LocalDateTime fechaCreacion;
 

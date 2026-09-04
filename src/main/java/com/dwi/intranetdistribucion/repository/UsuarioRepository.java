@@ -16,6 +16,8 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     boolean existsByEmail(String email);
 
+    boolean existsByRolId(Long rolId);
+
     @Modifying
     @Query("UPDATE Usuario u SET u.intentosFallidos = COALESCE(u.intentosFallidos, 0) + 1 WHERE u.id = :id")
     void incrementarIntentosFallidos(@Param("id") Long id);
