@@ -35,6 +35,12 @@ public class Usuario {
     @Column(name = "es_activo")
     private Boolean esActivo;
 
+    @Column(name = "intentos_fallidos")
+    private Integer intentosFallidos;
+
+    @Column(name = "es_bloqueado")
+    private Boolean esBloqueado;
+
     @Column(name = "fecha_creacion", updatable = false)
     private LocalDateTime fechaCreacion;
 
@@ -43,6 +49,12 @@ public class Usuario {
         this.fechaCreacion = LocalDateTime.now();
         if (this.esActivo == null) {
             this.esActivo = true;
+        }
+        if (this.intentosFallidos == null) {
+            this.intentosFallidos = 0;
+        }
+        if (this.esBloqueado == null) {
+            this.esBloqueado = false;
         }
     }
 }

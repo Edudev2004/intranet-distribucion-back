@@ -10,12 +10,16 @@ import com.dwi.intranetdistribucion.repository.UsuarioRepository;
 import com.dwi.intranetdistribucion.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -27,21 +31,53 @@ public class AuthServiceImpl implements AuthService {
     private final JwtTokenProvider jwtTokenProvider;
 
     @Override
+    @Transactional
     public JwtAuthResponseDTO login(LoginRequestDTO loginRequest) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        loginRequest.getEmail(),
-                        loginRequest.getPassword()
-                )
-        );
+        Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(loginRequest.getEmail());
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String token = jwtTokenProvider.generarToken(authentication);
+        if (usuarioOpt.isPresent()) {
+            Usuario usuario = usuarioOpt.get();
 
-        return JwtAuthResponseDTO.builder()
-                .accessToken(token)
-                .tokenType("Bearer")
-                .build();
+            if (Boolean.TRUE.equals(usuario.getEsBloqueado())) {
+                throw new LockedException("La cuenta se encuentra bloqueada por superar los 5 intentos fallidos.");
+            }
+
+            try {
+                Authentication authentication = authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(
+                                loginRequest.getEmail(),
+                                loginRequest.getPassword()
+                        )
+                );
+
+                // Si el login fue exitoso, reiniciamos el contador de intentos fallidos
+                usuario.setIntentosFallidos(0);
+                usuarioRepository.save(usuario);
+
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                String token = jwtTokenProvider.generarToken(authentication);
+
+                return JwtAuthResponseDTO.builder()
+                        .accessToken(token)
+                        .tokenType("Bearer")
+                        .build();
+
+            } catch (BadCredentialsException ex) {
+                int intentos = (usuario.getIntentosFallidos() == null ? 0 : usuario.getIntentosFallidos()) + 1;
+                usuario.setIntentosFallidos(intentos);
+
+                if (intentos >= 5) {
+                    usuario.setEsBloqueado(true);
+                    usuarioRepository.save(usuario);
+                    throw new LockedException("Cuenta bloqueada. Ha superado los 5 intentos fallidos permitidos.");
+                } else {
+                    usuarioRepository.save(usuario);
+                    throw new BadCredentialsException("Credenciales incorrectas. Llevas " + intentos + " de 5 intentos.");
+                }
+            }
+        } else {
+            throw new BadCredentialsException("Usuario o contraseña incorrectos");
+        }
     }
 
     @Override
@@ -56,6 +92,9 @@ public class AuthServiceImpl implements AuthService {
                 .apellido(request.getApellido())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
+                .esActivo(true)
+                .intentosFallidos(0)
+                .esBloqueado(false)
                 .build();
 
         Usuario guardado = usuarioRepository.save(usuario);
