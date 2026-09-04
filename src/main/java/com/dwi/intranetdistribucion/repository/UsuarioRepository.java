@@ -23,8 +23,12 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     void incrementarIntentosFallidos(@Param("id") Long id);
 
     @Modifying
-    @Query("UPDATE Usuario u SET u.esBloqueado = true WHERE u.id = :id")
+    @Query("UPDATE Usuario u SET u.esBloqueado = true, u.fechaBloqueo = CURRENT_TIMESTAMP WHERE u.id = :id")
     void bloquearUsuario(@Param("id") Long id);
+
+    @Modifying
+    @Query("UPDATE Usuario u SET u.esBloqueado = false, u.intentosFallidos = 0, u.fechaBloqueo = null WHERE u.id = :id")
+    void desbloquearUsuario(@Param("id") Long id);
 
     @Modifying
     @Query("UPDATE Usuario u SET u.intentosFallidos = 0 WHERE u.id = :id")

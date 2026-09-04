@@ -39,7 +39,23 @@ public class AuthServiceImpl implements AuthService {
             Usuario usuario = usuarioOpt.get();
 
             if (Boolean.TRUE.equals(usuario.getEsBloqueado())) {
-                throw new LockedException("La cuenta se encuentra bloqueada por superar los 5 intentos fallidos.");
+                if (usuario.getFechaBloqueo() != null &&
+                        usuario.getFechaBloqueo().plusMinutes(15).isBefore(java.time.LocalDateTime.now())) {
+                    // Han pasado más de 15 minutos: desbloqueo automático
+                    usuarioRepository.desbloquearUsuario(usuario.getId());
+                    usuario.setEsBloqueado(false);
+                    usuario.setIntentosFallidos(0);
+                } else {
+                    long minutosRestantes = 15;
+                    if (usuario.getFechaBloqueo() != null) {
+                        long minutosTranscurridos = java.time.Duration.between(
+                                usuario.getFechaBloqueo(),
+                                java.time.LocalDateTime.now()
+                        ).toMinutes();
+                        minutosRestantes = Math.max(1, 15 - minutosTranscurridos);
+                    }
+                    throw new LockedException("La cuenta se encuentra bloqueada por superar los 5 intentos fallidos. Vuelve a intentarlo en " + minutosRestantes + " minuto(s).");
+                }
             }
 
             try {
