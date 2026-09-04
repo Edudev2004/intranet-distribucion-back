@@ -13,11 +13,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 @Service
 @RequiredArgsConstructor
 public class UsuarioServiceImpl implements UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional(readOnly = true)
@@ -46,7 +49,7 @@ public class UsuarioServiceImpl implements UsuarioService {
                 .nombre(request.getNombre())
                 .apellido(request.getApellido())
                 .email(request.getEmail())
-                .password(request.getPassword()) // Recomendar BCryptPasswordEncoder a futuro
+                .password(passwordEncoder.encode(request.getPassword()))
                 .build();
 
         Usuario guardado = usuarioRepository.save(usuario);
