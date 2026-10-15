@@ -9,11 +9,11 @@ public interface UsuarioService {
 
     List<UsuarioResponseDTO> obtenerTodos();
 
-    UsuarioResponseDTO obtenerPorId(Long id);
+    UsuarioResponseDTO obtenerPorId(Integer id);
 
-    UsuarioResponseDTO crear(UsuarioRequestDTO usuarioRequestDTO);
+    UsuarioResponseDTO registrar(UsuarioRequestDTO usuarioRequestDTO);
 
-    UsuarioResponseDTO actualizar(Long id, UsuarioRequestDTO usuarioRequestDTO);
+    UsuarioResponseDTO actualizar(Integer id, UsuarioRequestDTO usuarioRequestDTO);
 
-    void eliminar(Long id);
+    UsuarioResponseDTO cambiarEstado(Integer id, boolean activo);
 }
