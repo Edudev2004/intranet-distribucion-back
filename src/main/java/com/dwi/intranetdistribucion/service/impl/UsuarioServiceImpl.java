@@ -117,9 +117,6 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     private Sede buscarSede(Integer idSede) {
-        if (idSede == null) {
-            return null;
-        }
         return sedeRepository.findById(idSede)
                 .orElseThrow(() -> new ResourceNotFoundException("Sede no encontrada con id: " + idSede));
     }
@@ -139,8 +136,8 @@ public class UsuarioServiceImpl implements UsuarioService {
                 .correo(usuario.getCorreo())
                 .idRol(rol.getIdRol())
                 .rol(rol.getNombre())
-                .idSede(sede != null ? sede.getIdSede() : null)
-                .sede(sede != null ? sede.getNombre() : null)
+                .idSede(sede.getIdSede())
+                .sede(sede.getNombre())
                 .activo(usuario.getActivo())
                 .intentosFallidos(usuario.getIntentosFallidos())
                 .bloqueado(usuario.getBloqueado())

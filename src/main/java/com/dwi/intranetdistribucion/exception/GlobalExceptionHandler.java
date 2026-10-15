@@ -25,6 +25,11 @@ public class GlobalExceptionHandler {
         return construirRespuesta(exception.getMessage(), webRequest, HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler(ResourceInUseException.class)
+    public ResponseEntity<ErrorDetails> manejarResourceInUseException(ResourceInUseException exception, WebRequest webRequest) {
+        return construirRespuesta(exception.getMessage(), webRequest, HttpStatus.CONFLICT);
+    }
+
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ErrorDetails> manejarBadRequestException(BadRequestException exception, WebRequest webRequest) {
         return construirRespuesta(exception.getMessage(), webRequest, HttpStatus.BAD_REQUEST);

@@ -39,5 +39,6 @@ public class UsuarioRequestDTO {
     @NotNull(message = "El rol es obligatorio")
     private Short idRol;
 
+    @NotNull(message = "La sede es obligatoria")
     private Integer idSede;
 }
