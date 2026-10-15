@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Data
 @NoArgsConstructor
@@ -13,10 +13,18 @@ import java.time.LocalDateTime;
 @Builder
 public class UsuarioResponseDTO {
 
-    private Long id;
-    private String nombre;
-    private String apellido;
-    private String email;
-    private Boolean esActivo;
-    private LocalDateTime fechaCreacion;
+    private Integer idUsuario;
+    private String nombres;
+    private String apellidos;
+    private String username;
+    private String correo;
+    private Short idRol;
+    private String rol;
+    private Integer idSede;
+    private String sede;
+    private Boolean activo;
+    private Short intentosFallidos;
+    private Boolean bloqueado;
+    private OffsetDateTime ultimoAcceso;
+    private OffsetDateTime creadoEn;
 }
