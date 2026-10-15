@@ -114,13 +114,16 @@ public class RolServiceImpl implements RolService {
         if (permisoIds == null || permisoIds.isEmpty()) {
             return new HashSet<>();
         }
-        return new HashSet<>(permisoRepository.findAllById(permisoIds));
+        List<Short> shortIds = permisoIds.stream().filter(java.util.Objects::nonNull).map(Long::shortValue).toList();
+        return new HashSet<>(permisoRepository.findAllById(shortIds));
     }
 
     private RolResponseDTO mapearADTO(Rol rol) {
-        Set<PermisoResponseDTO> permisosDTO = rol.getPermisos().stream()
-                .map(this::mapearPermisoADTO)
-                .collect(Collectors.toSet());
+        Set<PermisoResponseDTO> permisosDTO = rol.getPermisos() != null
+                ? rol.getPermisos().stream()
+                        .map(this::mapearPermisoADTO)
+                        .collect(Collectors.toSet())
+                : new HashSet<>();
 
         return RolResponseDTO.builder()
                 .id(rol.getId())
@@ -135,7 +138,7 @@ public class RolServiceImpl implements RolService {
                 .id(permiso.getId())
                 .nombre(permiso.getNombre())
                 .descripcion(permiso.getDescripcion())
-                .modulo(permiso.getModulo())
+                .modulo(permiso.getModuloNombre())
                 .build();
     }
 }

@@ -27,6 +27,10 @@ public class Sede {
     @Column(name = "direccion", columnDefinition = "varchar", nullable = false)
     private String direccion;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_responsable")
+    private Usuario responsable;
+
     @Column(name = "activo", nullable = false)
     private Boolean activo;
 }

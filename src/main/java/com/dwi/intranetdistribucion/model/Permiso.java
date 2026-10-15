@@ -3,12 +3,14 @@ package com.dwi.intranetdistribucion.model;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
-@Table(name = "permisos")
-@Data
+@Table(name = "permiso")
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -16,14 +18,41 @@ public class Permiso {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "id_permiso")
+    private Short idPermiso;
 
-    @Column(nullable = false, unique = true, length = 100)
-    private String nombre; // ej. USUARIOS_VER, PRODUCTOS_CREAR
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "id_modulo", nullable = false)
+    private Modulo modulo;
 
-    @Column(length = 255)
-    private String descripcion;
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "id_accion", nullable = false)
+    private Accion accion;
 
-    @Column(nullable = false, length = 50)
-    private String modulo; // ej. SEGURIDAD, INVENTARIO, PEDIDOS, LOGISTICA
+    // Helper compatibility methods
+    public Long getId() {
+        return idPermiso != null ? idPermiso.longValue() : null;
+    }
+
+    public void setId(Long id) {
+        this.idPermiso = id != null ? id.shortValue() : null;
+    }
+
+    public String getNombre() {
+        if (modulo != null && accion != null) {
+            return modulo.getNombre() + "_" + accion.getNombre();
+        }
+        return null;
+    }
+
+    public String getDescripcion() {
+        if (modulo != null && accion != null) {
+            return accion.getNombre() + " en " + modulo.getNombre();
+        }
+        return null;
+    }
+
+    public String getModuloNombre() {
+        return modulo != null ? modulo.getNombre() : null;
+    }
 }

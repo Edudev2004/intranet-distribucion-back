@@ -37,4 +37,9 @@ public class ProductoRequestDTO {
 
     @DecimalMin(value = "0", message = "El peso no puede ser negativo")
     private BigDecimal pesoKg;
+
+    @DecimalMin(value = "0", message = "El precio unitario no puede ser negativo")
+    private BigDecimal precioUnitario;
+
+    private Boolean activo;
 }

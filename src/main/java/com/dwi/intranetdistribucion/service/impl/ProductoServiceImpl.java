@@ -17,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Locale;
 
@@ -58,6 +59,8 @@ public class ProductoServiceImpl implements ProductoService {
                 .unidadMedida(buscarUnidad(request.getIdUnidad()))
                 .stockMinimo(request.getStockMinimo())
                 .pesoKg(request.getPesoKg())
+                .precioUnitario(request.getPrecioUnitario() != null ? request.getPrecioUnitario() : BigDecimal.ZERO)
+                .activo(request.getActivo() != null ? request.getActivo() : true)
                 .build();
 
         return mapearADTO(productoRepository.save(producto));
@@ -78,6 +81,12 @@ public class ProductoServiceImpl implements ProductoService {
         producto.setUnidadMedida(buscarUnidad(request.getIdUnidad()));
         producto.setStockMinimo(request.getStockMinimo());
         producto.setPesoKg(request.getPesoKg());
+        if (request.getPrecioUnitario() != null) {
+            producto.setPrecioUnitario(request.getPrecioUnitario());
+        }
+        if (request.getActivo() != null) {
+            producto.setActivo(request.getActivo());
+        }
 
         return mapearADTO(productoRepository.save(producto));
     }
@@ -126,6 +135,8 @@ public class ProductoServiceImpl implements ProductoService {
                 .unidadMedida(producto.getUnidadMedida().getCodigo())
                 .stockMinimo(producto.getStockMinimo())
                 .pesoKg(producto.getPesoKg())
+                .precioUnitario(producto.getPrecioUnitario())
+                .activo(producto.getActivo())
                 .build();
     }
 }
