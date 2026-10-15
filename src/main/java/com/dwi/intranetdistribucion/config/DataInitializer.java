@@ -59,13 +59,14 @@ public class DataInitializer implements CommandLineRunner {
         String adminEmail = "admin@distribucion.com";
         if (!usuarioRepository.existsByEmail(adminEmail)) {
             Usuario admin = Usuario.builder()
-                    .nombre("Administrador")
-                    .apellido("Sistema")
-                    .email(adminEmail)
-                    .password(passwordEncoder.encode("admin"))
-                    .esActivo(true)
-                    .intentosFallidos(0)
-                    .esBloqueado(false)
+                    .nombres("Administrador")
+                    .apellidos("Sistema")
+                    .username("admin")
+                    .correo(adminEmail)
+                    .passwordHash(passwordEncoder.encode("admin"))
+                    .activo(true)
+                    .intentosFallidos((short) 0)
+                    .bloqueado(false)
                     .rol(rolAdmin)
                     .build();
 

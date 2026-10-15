@@ -44,7 +44,7 @@ public class AuthServiceImpl implements AuthService {
                     // Han pasado más de 15 minutos: desbloqueo automático
                     usuarioRepository.desbloquearUsuario(usuario.getId());
                     usuario.setEsBloqueado(false);
-                    usuario.setIntentosFallidos(0);
+                    usuario.setIntentosFallidos((short) 0);
                 } else {
                     long minutosRestantes = 15;
                     if (usuario.getFechaBloqueo() != null) {
@@ -98,29 +98,34 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public UsuarioResponseDTO registrar(UsuarioRequestDTO request) {
-        if (usuarioRepository.existsByEmail(request.getEmail())) {
-            throw new IllegalArgumentException("El email ya se encuentra registrado");
+        String correo = request.getCorreo() != null ? request.getCorreo().trim().toLowerCase() : "";
+        if (usuarioRepository.existsByCorreoIgnoreCase(correo)) {
+            throw new IllegalArgumentException("El email ya se encuentra registrado: " + correo);
         }
 
         Usuario usuario = Usuario.builder()
-                .nombre(request.getNombre())
-                .apellido(request.getApellido())
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .esActivo(true)
-                .intentosFallidos(0)
-                .esBloqueado(false)
+                .nombres(request.getNombres())
+                .apellidos(request.getApellidos())
+                .username(request.getUsername())
+                .correo(correo)
+                .passwordHash(passwordEncoder.encode(request.getPassword()))
+                .activo(true)
+                .intentosFallidos((short) 0)
+                .bloqueado(false)
                 .build();
 
         Usuario guardado = usuarioRepository.save(usuario);
 
         return UsuarioResponseDTO.builder()
-                .id(guardado.getId())
-                .nombre(guardado.getNombre())
-                .apellido(guardado.getApellido())
-                .email(guardado.getEmail())
-                .esActivo(guardado.getEsActivo())
-                .fechaCreacion(guardado.getFechaCreacion())
+                .idUsuario(guardado.getIdUsuario())
+                .nombres(guardado.getNombres())
+                .apellidos(guardado.getApellidos())
+                .username(guardado.getUsername())
+                .correo(guardado.getCorreo())
+                .activo(guardado.getActivo())
+                .intentosFallidos(guardado.getIntentosFallidos())
+                .bloqueado(guardado.getBloqueado())
+                .creadoEn(guardado.getCreadoEn())
                 .build();
     }
 }

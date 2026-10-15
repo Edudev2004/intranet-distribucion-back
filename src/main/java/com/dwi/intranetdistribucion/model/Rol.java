@@ -3,15 +3,17 @@ package com.dwi.intranetdistribucion.model;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "roles")
-@Data
+@Table(name = "rol")
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -19,12 +21,13 @@ public class Rol {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "id_rol")
+    private Short idRol;
 
-    @Column(nullable = false, unique = true, length = 50)
-    private String nombre; // ej. ADMIN, ALMACENERO, CONDUCTOR, CLIENTE
+    @Column(name = "nombre", columnDefinition = "varchar", nullable = false, unique = true)
+    private String nombre;
 
-    @Column(length = 255)
+    @Column(name = "descripcion", columnDefinition = "varchar")
     private String descripcion;
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -35,4 +38,13 @@ public class Rol {
     )
     @Builder.Default
     private Set<Permiso> permisos = new HashSet<>();
+
+    // Compatibility helpers for RF-02
+    public Long getId() {
+        return idRol != null ? idRol.longValue() : null;
+    }
+
+    public void setId(Long id) {
+        this.idRol = id != null ? id.shortValue() : null;
+    }
 }
