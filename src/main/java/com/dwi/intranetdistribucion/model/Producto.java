@@ -42,4 +42,26 @@ public class Producto {
 
     @Column(name = "peso_kg", columnDefinition = "numeric")
     private BigDecimal pesoKg;
+
+    @Column(name = "precio_unitario", columnDefinition = "numeric", nullable = false)
+    private BigDecimal precioUnitario;
+
+    @Column(name = "activo", nullable = false)
+    private Boolean activo;
+
+    @PrePersist
+    protected void onCreate() {
+        if (this.activo == null) {
+            this.activo = true;
+        }
+        if (this.precioUnitario == null) {
+            this.precioUnitario = BigDecimal.ZERO;
+        }
+        if (this.stockMinimo == null) {
+            this.stockMinimo = BigDecimal.ZERO;
+        }
+        if (this.pesoKg == null) {
+            this.pesoKg = BigDecimal.ZERO;
+        }
+    }
 }

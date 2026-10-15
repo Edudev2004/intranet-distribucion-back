@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
 @Entity
@@ -38,12 +39,12 @@ public class Usuario {
     @Column(name = "password_hash", columnDefinition = "varchar", nullable = false)
     private String passwordHash;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "id_rol", nullable = false)
     private Rol rol;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_sede", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_sede")
     private Sede sede;
 
     @Column(name = "activo", nullable = false)
@@ -54,6 +55,9 @@ public class Usuario {
 
     @Column(name = "bloqueado", nullable = false)
     private Boolean bloqueado;
+
+    @Column(name = "fecha_bloqueo")
+    private LocalDateTime fechaBloqueo;
 
     @Column(name = "ultimo_acceso")
     private OffsetDateTime ultimoAcceso;
@@ -75,5 +79,66 @@ public class Usuario {
         if (this.intentosFallidos == null) {
             this.intentosFallidos = 0;
         }
+    }
+
+    // Compatibility methods for RF-01 / RF-02 / Security
+    public Long getId() {
+        return idUsuario != null ? idUsuario.longValue() : null;
+    }
+
+    public void setId(Long id) {
+        this.idUsuario = id != null ? id.intValue() : null;
+    }
+
+    public String getNombre() {
+        return nombres;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombres = nombre;
+    }
+
+    public String getApellido() {
+        return apellidos;
+    }
+
+    public void setApellido(String apellido) {
+        this.apellidos = apellido;
+    }
+
+    public String getEmail() {
+        return correo;
+    }
+
+    public void setEmail(String email) {
+        this.correo = email;
+    }
+
+    public String getPassword() {
+        return passwordHash;
+    }
+
+    public void setPassword(String password) {
+        this.passwordHash = password;
+    }
+
+    public Boolean getEsActivo() {
+        return activo;
+    }
+
+    public void setEsActivo(Boolean esActivo) {
+        this.activo = esActivo;
+    }
+
+    public Boolean getEsBloqueado() {
+        return bloqueado;
+    }
+
+    public void setEsBloqueado(Boolean esBloqueado) {
+        this.bloqueado = esBloqueado;
+    }
+
+    public LocalDateTime getFechaCreacion() {
+        return creadoEn != null ? creadoEn.toLocalDateTime() : null;
     }
 }

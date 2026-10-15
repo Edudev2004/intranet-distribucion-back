@@ -22,4 +22,6 @@ public class ProductoResponseDTO {
     private String unidadMedida;
     private BigDecimal stockMinimo;
     private BigDecimal pesoKg;
+    private BigDecimal precioUnitario;
+    private Boolean activo;
 }

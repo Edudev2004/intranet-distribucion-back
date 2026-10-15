@@ -7,6 +7,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Table(name = "rol")
 @Getter
@@ -26,4 +29,22 @@ public class Rol {
 
     @Column(name = "descripcion", columnDefinition = "varchar")
     private String descripcion;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "rol_permiso",
+            joinColumns = @JoinColumn(name = "id_rol"),
+            inverseJoinColumns = @JoinColumn(name = "id_permiso")
+    )
+    @Builder.Default
+    private Set<Permiso> permisos = new HashSet<>();
+
+    // Compatibility helpers for RF-02
+    public Long getId() {
+        return idRol != null ? idRol.longValue() : null;
+    }
+
+    public void setId(Long id) {
+        this.idRol = id != null ? id.shortValue() : null;
+    }
 }
