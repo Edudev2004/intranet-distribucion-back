@@ -1,5 +1,6 @@
 package com.dwi.intranetdistribucion.repository;
 
+import com.dwi.intranetdistribucion.model.Rol;
 import com.dwi.intranetdistribucion.model.Usuario;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -44,11 +45,13 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
         return existsByCorreoIgnoreCase(email);
     }
 
-    @Query("SELECT COUNT(u) > 0 FROM Usuario u WHERE u.rol.idRol = :rolId")
-    boolean existsByRol_IdRol(@Param("rolId") Short rolId);
+    boolean existsByRol(Rol rol);
+
+    @Query(value = "SELECT COUNT(*) FROM usuario WHERE id_rol = :rolId", nativeQuery = true)
+    long countByRolIdNative(@Param("rolId") Short rolId);
 
     default boolean existsByRolId(Long rolId) {
-        return rolId != null && existsByRol_IdRol(rolId.shortValue());
+        return rolId != null && countByRolIdNative(rolId.shortValue()) > 0;
     }
 
     @Transactional

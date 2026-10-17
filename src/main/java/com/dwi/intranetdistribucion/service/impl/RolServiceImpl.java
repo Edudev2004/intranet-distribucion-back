@@ -94,8 +94,16 @@ public class RolServiceImpl implements RolService {
         Rol rol = rolRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Rol no encontrado con id: " + id));
 
+        // Validación de Seguridad: No se pueden eliminar los roles base del sistema
+        if ("ADMIN".equalsIgnoreCase(rol.getNombre())) {
+            throw new IllegalStateException("No se puede eliminar el rol principal de Administrador (ADMIN).");
+        }
+        if (List.of("ALMACENERO", "CONDUCTOR", "CLIENTE").contains(rol.getNombre().toUpperCase())) {
+            throw new IllegalStateException("No se puede eliminar un rol base del sistema: " + rol.getNombre());
+        }
+
         // Criterio de Aceptación: No se puede eliminar un rol que tenga usuarios asignados
-        if (usuarioRepository.existsByRolId(id)) {
+        if (usuarioRepository.existsByRol(rol) || usuarioRepository.existsByRolId(id)) {
             throw new IllegalStateException("No se puede eliminar un rol que tenga usuarios asignados.");
         }
 
