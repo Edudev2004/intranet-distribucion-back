@@ -96,6 +96,14 @@ public class DataInitializer implements CommandLineRunner {
             System.out.println(">>> Rol:      ADMIN");
             System.out.println(">>> Sede:     " + sedeDefault.getNombre());
             System.out.println("=================================================");
+        } else {
+            // Si el admin inicial fue bloqueado en pruebas previas, restaurar su estado al arrancar
+            usuarioRepository.findByCorreoIgnoreCase(adminEmail).ifPresent(admin -> {
+                if (Boolean.TRUE.equals(admin.getEsBloqueado()) || admin.getIntentosFallidos() > 0) {
+                    usuarioRepository.desbloquearUsuario(admin.getId());
+                    System.out.println(">>> Usuario " + adminEmail + " desbloqueado automáticamente para continuar pruebas <<<");
+                }
+            });
         }
 
         // 6. Inicializar Tipos de Movimiento de Inventario

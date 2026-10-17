@@ -5,7 +5,11 @@ import com.dwi.intranetdistribucion.dto.request.LoginRequestDTO;
 import com.dwi.intranetdistribucion.dto.request.UsuarioRequestDTO;
 import com.dwi.intranetdistribucion.dto.response.JwtAuthResponseDTO;
 import com.dwi.intranetdistribucion.dto.response.UsuarioResponseDTO;
+import com.dwi.intranetdistribucion.model.Rol;
+import com.dwi.intranetdistribucion.model.Sede;
 import com.dwi.intranetdistribucion.model.Usuario;
+import com.dwi.intranetdistribucion.repository.RolRepository;
+import com.dwi.intranetdistribucion.repository.SedeRepository;
 import com.dwi.intranetdistribucion.repository.UsuarioRepository;
 import com.dwi.intranetdistribucion.service.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +31,8 @@ public class AuthServiceImpl implements AuthService {
 
     private final AuthenticationManager authenticationManager;
     private final UsuarioRepository usuarioRepository;
+    private final RolRepository rolRepository;
+    private final SedeRepository sedeRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -103,12 +109,22 @@ public class AuthServiceImpl implements AuthService {
             throw new IllegalArgumentException("El email ya se encuentra registrado: " + correo);
         }
 
+        Rol rol = (request.getIdRol() != null)
+                ? rolRepository.findById(request.getIdRol().shortValue()).orElseGet(() -> rolRepository.findByNombre("ADMIN").orElse(null))
+                : rolRepository.findByNombre("ADMIN").orElse(null);
+
+        Sede sede = (request.getIdSede() != null)
+                ? sedeRepository.findById(request.getIdSede()).orElseGet(() -> sedeRepository.findAll().stream().findFirst().orElse(null))
+                : sedeRepository.findAll().stream().findFirst().orElse(null);
+
         Usuario usuario = Usuario.builder()
                 .nombres(request.getNombres())
                 .apellidos(request.getApellidos())
                 .username(request.getUsername())
                 .correo(correo)
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
+                .rol(rol)
+                .sede(sede)
                 .activo(true)
                 .intentosFallidos((short) 0)
                 .bloqueado(false)
