@@ -21,7 +21,7 @@ public class AlmacenController {
     private final AlmacenService almacenService;
 
     @GetMapping
-    public ResponseEntity<List<AlmacenResponseDTO>> obtenerTodos(@RequestParam(required = false) Integer idSede) {
+    public ResponseEntity<List<AlmacenResponseDTO>> obtenerTodos(@RequestParam(name = "idSede", required = false) Integer idSede) {
         return ResponseEntity.ok(almacenService.obtenerTodos(idSede));
     }
 
@@ -31,12 +31,12 @@ public class AlmacenController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AlmacenResponseDTO> obtenerPorId(@PathVariable Integer id) {
+    public ResponseEntity<AlmacenResponseDTO> obtenerPorId(@PathVariable("id") Integer id) {
         return ResponseEntity.ok(almacenService.obtenerPorId(id));
     }
 
     @GetMapping("/{id}/productos")
-    public ResponseEntity<List<ProductoAlmacenResponseDTO>> obtenerProductos(@PathVariable Integer id) {
+    public ResponseEntity<List<ProductoAlmacenResponseDTO>> obtenerProductos(@PathVariable("id") Integer id) {
         return ResponseEntity.ok(almacenService.obtenerProductos(id));
     }
 
@@ -46,13 +46,13 @@ public class AlmacenController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<AlmacenResponseDTO> actualizar(@PathVariable Integer id,
+    public ResponseEntity<AlmacenResponseDTO> actualizar(@PathVariable("id") Integer id,
                                                          @Valid @RequestBody AlmacenRequestDTO request) {
         return ResponseEntity.ok(almacenService.actualizar(id, request));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
+    public ResponseEntity<Void> eliminar(@PathVariable("id") Integer id) {
         almacenService.eliminar(id);
         return ResponseEntity.noContent().build();
     }

@@ -24,7 +24,7 @@ public class RolController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<RolResponseDTO> obtenerPorId(@PathVariable Long id) {
+    public ResponseEntity<RolResponseDTO> obtenerPorId(@PathVariable("id") Long id) {
         return ResponseEntity.ok(rolService.obtenerPorId(id));
     }
 
@@ -35,13 +35,13 @@ public class RolController {
 
     @PutMapping("/{id}")
     public ResponseEntity<RolResponseDTO> actualizar(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @RequestBody RolRequestDTO request) {
         return ResponseEntity.ok(rolService.actualizar(id, request));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+    public ResponseEntity<Void> eliminar(@PathVariable("id") Long id) {
         rolService.eliminar(id);
         return ResponseEntity.noContent().build();
     }

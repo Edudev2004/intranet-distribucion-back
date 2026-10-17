@@ -24,7 +24,7 @@ public class UsuarioController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UsuarioResponseDTO> obtenerPorId(@PathVariable Integer id) {
+    public ResponseEntity<UsuarioResponseDTO> obtenerPorId(@PathVariable("id") Integer id) {
         return ResponseEntity.ok(usuarioService.obtenerPorId(id));
     }
 
@@ -35,15 +35,15 @@ public class UsuarioController {
 
     @PutMapping("/{id}")
     public ResponseEntity<UsuarioResponseDTO> actualizar(
-            @PathVariable Integer id,
+            @PathVariable("id") Integer id,
             @Valid @RequestBody UsuarioRequestDTO usuarioRequestDTO) {
         return ResponseEntity.ok(usuarioService.actualizar(id, usuarioRequestDTO));
     }
 
     @PatchMapping("/{id}/estado")
     public ResponseEntity<UsuarioResponseDTO> cambiarEstado(
-            @PathVariable Integer id,
-            @RequestParam boolean activo) {
+            @PathVariable("id") Integer id,
+            @RequestParam("activo") boolean activo) {
         return ResponseEntity.ok(usuarioService.cambiarEstado(id, activo));
     }
 }

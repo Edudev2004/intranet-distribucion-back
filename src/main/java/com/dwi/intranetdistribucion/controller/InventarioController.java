@@ -24,24 +24,24 @@ public class InventarioController {
 
     @GetMapping
     public ResponseEntity<InventarioConsultaDTO> consultarInventario(
-            @RequestParam(required = false) Integer idAlmacen,
-            @RequestParam(required = false) Integer idCategoria,
-            @RequestParam(required = false, defaultValue = "false") Boolean soloBajoStock,
-            @RequestParam(required = false) String buscar) {
+            @RequestParam(name = "idAlmacen", required = false) Integer idAlmacen,
+            @RequestParam(name = "idCategoria", required = false) Integer idCategoria,
+            @RequestParam(name = "soloBajoStock", required = false, defaultValue = "false") Boolean soloBajoStock,
+            @RequestParam(name = "buscar", required = false) String buscar) {
         return ResponseEntity.ok(inventarioService.consultarInventario(idAlmacen, idCategoria, soloBajoStock, buscar));
     }
 
     @GetMapping("/alertas")
     public ResponseEntity<List<AlertaStockDTO>> obtenerAlertas(
-            @RequestParam(required = false) Integer idAlmacen,
-            @RequestParam(required = false) Integer idCategoria) {
+            @RequestParam(name = "idAlmacen", required = false) Integer idAlmacen,
+            @RequestParam(name = "idCategoria", required = false) Integer idCategoria) {
         return ResponseEntity.ok(inventarioService.obtenerAlertas(idAlmacen, idCategoria));
     }
 
     @GetMapping("/{idAlmacen}/{idProducto}")
     public ResponseEntity<InventarioItemDTO> obtenerStockProducto(
-            @PathVariable Integer idAlmacen,
-            @PathVariable Integer idProducto) {
+            @PathVariable("idAlmacen") Integer idAlmacen,
+            @PathVariable("idProducto") Integer idProducto) {
         return ResponseEntity.ok(inventarioService.obtenerStockProducto(idAlmacen, idProducto));
     }
 
@@ -68,11 +68,11 @@ public class InventarioController {
 
     @GetMapping("/movimientos")
     public ResponseEntity<List<MovimientoResponseDTO>> obtenerHistorialMovimientos(
-            @RequestParam(required = false) Integer idAlmacen,
-            @RequestParam(required = false) Integer idProducto,
-            @RequestParam(required = false) Short idTipoMovimiento,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime fechaInicio,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime fechaFin) {
+            @RequestParam(name = "idAlmacen", required = false) Integer idAlmacen,
+            @RequestParam(name = "idProducto", required = false) Integer idProducto,
+            @RequestParam(name = "idTipoMovimiento", required = false) Short idTipoMovimiento,
+            @RequestParam(name = "fechaInicio", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime fechaInicio,
+            @RequestParam(name = "fechaFin", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime fechaFin) {
         return ResponseEntity.ok(inventarioService.obtenerHistorialMovimientos(
                 idAlmacen,
                 idProducto,

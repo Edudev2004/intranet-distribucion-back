@@ -21,7 +21,7 @@ public class SedeController {
 
     @GetMapping
     public ResponseEntity<List<SedeResponseDTO>> obtenerTodas(
-            @RequestParam(required = false, defaultValue = "false") Boolean soloActivos) {
+            @RequestParam(name = "soloActivos", required = false, defaultValue = "false") Boolean soloActivos) {
         return ResponseEntity.ok(sedeService.obtenerTodas(soloActivos));
     }
 
@@ -31,7 +31,7 @@ public class SedeController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<SedeResponseDTO> obtenerPorId(@PathVariable Integer id) {
+    public ResponseEntity<SedeResponseDTO> obtenerPorId(@PathVariable("id") Integer id) {
         return ResponseEntity.ok(sedeService.obtenerPorId(id));
     }
 
@@ -42,21 +42,21 @@ public class SedeController {
 
     @PutMapping("/{id}")
     public ResponseEntity<SedeResponseDTO> actualizar(
-            @PathVariable Integer id,
+            @PathVariable("id") Integer id,
             @Valid @RequestBody SedeRequestDTO request) {
         return ResponseEntity.ok(sedeService.actualizar(id, request));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
+    public ResponseEntity<Void> eliminar(@PathVariable("id") Integer id) {
         sedeService.eliminar(id);
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}/estado")
     public ResponseEntity<SedeResponseDTO> cambiarEstado(
-            @PathVariable Integer id,
-            @RequestParam boolean activo) {
+            @PathVariable("id") Integer id,
+            @RequestParam("activo") boolean activo) {
         return ResponseEntity.ok(sedeService.cambiarEstado(id, activo));
     }
 }

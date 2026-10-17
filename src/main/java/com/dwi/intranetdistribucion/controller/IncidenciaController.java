@@ -26,13 +26,13 @@ public class IncidenciaController {
 
     @GetMapping
     public ResponseEntity<List<IncidenciaResponseDTO>> listar(
-            @RequestParam(required = false) Long idEntrega,
-            @RequestParam(required = false) Long idPedido) {
+            @RequestParam(name = "idEntrega", required = false) Long idEntrega,
+            @RequestParam(name = "idPedido", required = false) Long idPedido) {
         return ResponseEntity.ok(incidenciaService.listar(idEntrega, idPedido));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<IncidenciaResponseDTO> obtenerPorId(@PathVariable Long id) {
+    public ResponseEntity<IncidenciaResponseDTO> obtenerPorId(@PathVariable("id") Long id) {
         return ResponseEntity.ok(incidenciaService.obtenerPorId(id));
     }
 

@@ -25,23 +25,23 @@ public class ReporteInventarioController {
     // Vista previa en JSON con los mismos datos que los archivos exportados
     @GetMapping
     public ResponseEntity<ReporteInventarioDTO> obtenerReporte(
-            @RequestParam(required = false) Integer idAlmacen,
-            @RequestParam(required = false) Integer idCategoria) {
+            @RequestParam(name = "idAlmacen", required = false) Integer idAlmacen,
+            @RequestParam(name = "idCategoria", required = false) Integer idCategoria) {
         return ResponseEntity.ok(reporteInventarioService.obtenerReporte(idAlmacen, idCategoria));
     }
 
     @GetMapping(value = "/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
     public ResponseEntity<byte[]> descargarPdf(
-            @RequestParam(required = false) Integer idAlmacen,
-            @RequestParam(required = false) Integer idCategoria) {
+            @RequestParam(name = "idAlmacen", required = false) Integer idAlmacen,
+            @RequestParam(name = "idCategoria", required = false) Integer idCategoria) {
         return construirDescarga(reporteInventarioService.generarPdf(idAlmacen, idCategoria),
                 MediaType.APPLICATION_PDF);
     }
 
     @GetMapping(value = "/excel", produces = MEDIA_TYPE_EXCEL)
     public ResponseEntity<byte[]> descargarExcel(
-            @RequestParam(required = false) Integer idAlmacen,
-            @RequestParam(required = false) Integer idCategoria) {
+            @RequestParam(name = "idAlmacen", required = false) Integer idAlmacen,
+            @RequestParam(name = "idCategoria", required = false) Integer idCategoria) {
         return construirDescarga(reporteInventarioService.generarExcel(idAlmacen, idCategoria),
                 MediaType.parseMediaType(MEDIA_TYPE_EXCEL));
     }

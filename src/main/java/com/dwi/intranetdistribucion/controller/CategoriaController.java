@@ -24,7 +24,7 @@ public class CategoriaController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CategoriaResponseDTO> obtenerPorId(@PathVariable Integer id) {
+    public ResponseEntity<CategoriaResponseDTO> obtenerPorId(@PathVariable("id") Integer id) {
         return ResponseEntity.ok(categoriaService.obtenerPorId(id));
     }
 
@@ -35,13 +35,13 @@ public class CategoriaController {
 
     @PutMapping("/{id}")
     public ResponseEntity<CategoriaResponseDTO> actualizar(
-            @PathVariable Integer id,
+            @PathVariable("id") Integer id,
             @Valid @RequestBody CategoriaRequestDTO categoriaRequestDTO) {
         return ResponseEntity.ok(categoriaService.actualizar(id, categoriaRequestDTO));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
+    public ResponseEntity<Void> eliminar(@PathVariable("id") Integer id) {
         categoriaService.eliminar(id);
         return ResponseEntity.noContent().build();
     }

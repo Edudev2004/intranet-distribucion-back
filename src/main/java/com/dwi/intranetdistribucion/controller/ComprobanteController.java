@@ -30,21 +30,21 @@ public class ComprobanteController {
 
     @GetMapping
     public ResponseEntity<List<ComprobanteResponseDTO>> listar(
-            @RequestParam(required = false) Long idPedido,
-            @RequestParam(required = false) Short idTipoComprobante) {
+            @RequestParam(name = "idPedido", required = false) Long idPedido,
+            @RequestParam(name = "idTipoComprobante", required = false) Short idTipoComprobante) {
         return ResponseEntity.ok(comprobanteService.listar(idPedido, idTipoComprobante));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ComprobanteResponseDTO> obtenerPorId(@PathVariable Long id) {
+    public ResponseEntity<ComprobanteResponseDTO> obtenerPorId(@PathVariable("id") Long id) {
         return ResponseEntity.ok(comprobanteService.obtenerPorId(id));
     }
 
     // descargar=false muestra el PDF en el navegador en lugar de descargarlo
     @GetMapping(value = "/{id}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
     public ResponseEntity<byte[]> descargarPdf(
-            @PathVariable Long id,
-            @RequestParam(defaultValue = "true") boolean descargar) {
+            @PathVariable("id") Long id,
+            @RequestParam(name = "descargar", defaultValue = "true") boolean descargar) {
         ComprobantePdfDTO pdf = comprobanteService.generarPdf(id);
         ContentDisposition disposicion = (descargar ? ContentDisposition.attachment() : ContentDisposition.inline())
                 .filename(pdf.getNombreArchivo())

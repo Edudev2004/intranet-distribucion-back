@@ -20,12 +20,12 @@ public class ProductoController {
 
     @GetMapping
     public ResponseEntity<List<ProductoResponseDTO>> obtenerTodos(
-            @RequestParam(required = false) Integer idCategoria) {
+            @RequestParam(name = "idCategoria", required = false) Integer idCategoria) {
         return ResponseEntity.ok(productoService.obtenerTodos(idCategoria));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductoResponseDTO> obtenerPorId(@PathVariable Integer id) {
+    public ResponseEntity<ProductoResponseDTO> obtenerPorId(@PathVariable("id") Integer id) {
         return ResponseEntity.ok(productoService.obtenerPorId(id));
     }
 
@@ -36,13 +36,13 @@ public class ProductoController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ProductoResponseDTO> actualizar(
-            @PathVariable Integer id,
+            @PathVariable("id") Integer id,
             @Valid @RequestBody ProductoRequestDTO request) {
         return ResponseEntity.ok(productoService.actualizar(id, request));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
+    public ResponseEntity<Void> eliminar(@PathVariable("id") Integer id) {
         productoService.eliminar(id);
         return ResponseEntity.noContent().build();
     }
