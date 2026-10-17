@@ -21,6 +21,7 @@ public class DataInitializer implements CommandLineRunner {
     private final AccionRepository accionRepository;
     private final PermisoRepository permisoRepository;
     private final SedeRepository sedeRepository;
+    private final TipoMovimientoRepository tipoMovimientoRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -95,6 +96,24 @@ public class DataInitializer implements CommandLineRunner {
             System.out.println(">>> Rol:      ADMIN");
             System.out.println(">>> Sede:     " + sedeDefault.getNombre());
             System.out.println("=================================================");
+        }
+
+        // 6. Inicializar Tipos de Movimiento de Inventario
+        crearTipoMovimientoSiNoExiste("ENTRADA_COMPRA", 'E');
+        crearTipoMovimientoSiNoExiste("ENTRADA_AJUSTE", 'E');
+        crearTipoMovimientoSiNoExiste("ENTRADA_DEVOLUCION", 'E');
+        crearTipoMovimientoSiNoExiste("SALIDA_VENTA", 'S');
+        crearTipoMovimientoSiNoExiste("SALIDA_MERMA", 'S');
+        crearTipoMovimientoSiNoExiste("SALIDA_AJUSTE", 'S');
+        crearTipoMovimientoSiNoExiste("SALIDA_TRASLADO", 'S');
+    }
+
+    private void crearTipoMovimientoSiNoExiste(String nombre, Character naturaleza) {
+        if (!tipoMovimientoRepository.existsByNombreIgnoreCase(nombre)) {
+            tipoMovimientoRepository.save(TipoMovimiento.builder()
+                    .nombre(nombre)
+                    .naturaleza(naturaleza)
+                    .build());
         }
     }
 
