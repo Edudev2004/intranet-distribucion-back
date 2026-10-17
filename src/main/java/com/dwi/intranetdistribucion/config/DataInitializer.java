@@ -46,6 +46,8 @@ public class DataInitializer implements CommandLineRunner {
         crearPermisoSiNoExiste("LOGISTICA", "RUTAS");
         crearPermisoSiNoExiste("FLOTA", "GESTIONAR");
         crearPermisoSiNoExiste("REPORTES", "VER");
+        crearPermisoSiNoExiste("SEDES", "VER");
+        crearPermisoSiNoExiste("SEDES", "GESTIONAR");
 
         // 3. Inicializar Rol ADMIN con todos los permisos
         Rol rolAdmin = rolRepository.findByNombre("ADMIN").orElseGet(() -> {

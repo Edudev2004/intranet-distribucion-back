@@ -33,4 +33,11 @@ public class Sede {
 
     @Column(name = "activo", nullable = false)
     private Boolean activo;
+
+    @PrePersist
+    protected void onCreate() {
+        if (this.activo == null) {
+            this.activo = true;
+        }
+    }
 }
