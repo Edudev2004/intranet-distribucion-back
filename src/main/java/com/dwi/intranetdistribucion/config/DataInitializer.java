@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
@@ -25,6 +26,7 @@ public class DataInitializer implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
 
     @Override
+    @Transactional
     public void run(String... args) throws Exception {
 
         // 1. Inicializar Sede Central por defecto si no existe
@@ -99,8 +101,11 @@ public class DataInitializer implements CommandLineRunner {
         } else {
             // Si el admin inicial fue bloqueado en pruebas previas, restaurar su estado al arrancar
             usuarioRepository.findByCorreoIgnoreCase(adminEmail).ifPresent(admin -> {
-                if (Boolean.TRUE.equals(admin.getEsBloqueado()) || admin.getIntentosFallidos() > 0) {
-                    usuarioRepository.desbloquearUsuario(admin.getId());
+                if (Boolean.TRUE.equals(admin.getEsBloqueado()) || (admin.getIntentosFallidos() != null && admin.getIntentosFallidos() > 0)) {
+                    admin.setBloqueado(false);
+                    admin.setIntentosFallidos((short) 0);
+                    admin.setFechaBloqueo(null);
+                    usuarioRepository.save(admin);
                     System.out.println(">>> Usuario " + adminEmail + " desbloqueado automáticamente para continuar pruebas <<<");
                 }
             });

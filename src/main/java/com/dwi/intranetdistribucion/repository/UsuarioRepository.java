@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -50,6 +51,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
         return rolId != null && existsByRol_IdRol(rolId.shortValue());
     }
 
+    @Transactional
     @Modifying
     @Query("UPDATE Usuario u SET u.intentosFallidos = CAST(COALESCE(u.intentosFallidos, 0) + 1 AS short) WHERE u.idUsuario = :id")
     void incrementarIntentosFallidos(@Param("id") Integer id);
@@ -60,6 +62,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
         }
     }
 
+    @Transactional
     @Modifying
     @Query("UPDATE Usuario u SET u.bloqueado = true, u.fechaBloqueo = CURRENT_TIMESTAMP WHERE u.idUsuario = :id")
     void bloquearUsuario(@Param("id") Integer id);
@@ -70,6 +73,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
         }
     }
 
+    @Transactional
     @Modifying
     @Query("UPDATE Usuario u SET u.bloqueado = false, u.intentosFallidos = 0, u.fechaBloqueo = null WHERE u.idUsuario = :id")
     void desbloquearUsuario(@Param("id") Integer id);
@@ -80,6 +84,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
         }
     }
 
+    @Transactional
     @Modifying
     @Query("UPDATE Usuario u SET u.intentosFallidos = 0 WHERE u.idUsuario = :id")
     void reiniciarIntentosFallidos(@Param("id") Integer id);
