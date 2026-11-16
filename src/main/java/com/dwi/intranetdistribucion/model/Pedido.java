@@ -1,23 +1,27 @@
 package com.dwi.intranetdistribucion.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Immutable;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
-// Vista de solo lectura de public.pedido: la gestión de pedidos pertenece a otro módulo.
-// Cliente, almacén, usuario y estado se exponen como ids hasta que existan sus entidades.
+// Cabecera de pedido (public.pedido). Cliente, almacén, usuario y estado se manejan como ids.
 @Entity
 @Table(name = "pedido")
-@Immutable
 @Getter
+@Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Pedido {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_pedido")
     private Long idPedido;
 
