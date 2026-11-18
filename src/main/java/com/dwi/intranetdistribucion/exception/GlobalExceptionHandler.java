@@ -1,9 +1,12 @@
 package com.dwi.intranetdistribucion.exception;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
@@ -15,6 +18,7 @@ import org.springframework.web.context.request.WebRequest;
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -53,17 +57,29 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorDetails> manejarIntegridad(DataIntegrityViolationException exception, WebRequest webRequest) {
+        log.warn("Violación de integridad de datos en [{}]: {}", webRequest.getDescription(false), exception.getMessage());
         return construirRespuesta("La operación viola una restricción de integridad de datos", webRequest, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(DataAccessException.class)
+    public ResponseEntity<ErrorDetails> manejarDataAccessException(DataAccessException exception, WebRequest webRequest) {
+        log.error("Error de base de datos o consulta SQL en [{}]: ", webRequest.getDescription(false), exception);
+        return construirRespuesta("No fue posible completar la operación en el sistema. Por favor, comuníquese con el administrador.", webRequest, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorDetails> manejarBadCredentialsException(BadCredentialsException exception, WebRequest webRequest) {
         ErrorDetails errorDetails = new ErrorDetails(
                 LocalDateTime.now(),
-                exception.getMessage(),
+                "Usuario o contraseña incorrectos",
                 webRequest.getDescription(false)
         );
         return new ResponseEntity<>(errorDetails, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorDetails> manejarAccessDeniedException(AccessDeniedException exception, WebRequest webRequest) {
+        return construirRespuesta("No cuenta con permisos suficientes para realizar esta acción.", webRequest, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(DisabledException.class)
@@ -103,7 +119,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorDetails> manejarGlobalException(Exception exception, WebRequest webRequest) {
-        return construirRespuesta(exception.getMessage(), webRequest, HttpStatus.INTERNAL_SERVER_ERROR);
+        log.error("Excepción no controlada en el servidor en [{}]: ", webRequest.getDescription(false), exception);
+        return construirRespuesta("Ha ocurrido un error inesperado en el servidor. Por favor, intente más tarde.", webRequest, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     private ResponseEntity<ErrorDetails> construirRespuesta(String mensaje, WebRequest webRequest, HttpStatus status) {
