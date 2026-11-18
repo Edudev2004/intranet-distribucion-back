@@ -1,7 +1,9 @@
 package com.dwi.intranetdistribucion.service.impl;
 
+import com.dwi.intranetdistribucion.dto.request.AprobacionPedidoRequestDTO;
 import com.dwi.intranetdistribucion.dto.request.DetallePedidoRequestDTO;
 import com.dwi.intranetdistribucion.dto.request.PedidoRequestDTO;
+import com.dwi.intranetdistribucion.dto.response.AprobacionPedidoResponseDTO;
 import com.dwi.intranetdistribucion.dto.response.ClienteOpcionDTO;
 import com.dwi.intranetdistribucion.dto.response.DetallePedidoResponseDTO;
 import com.dwi.intranetdistribucion.dto.response.PedidoResponseDTO;
@@ -10,12 +12,14 @@ import com.dwi.intranetdistribucion.dto.response.ProductoDisponibleDTO;
 import com.dwi.intranetdistribucion.exception.BadRequestException;
 import com.dwi.intranetdistribucion.exception.ResourceNotFoundException;
 import com.dwi.intranetdistribucion.model.Almacen;
+import com.dwi.intranetdistribucion.model.AprobacionPedido;
 import com.dwi.intranetdistribucion.model.DetallePedido;
 import com.dwi.intranetdistribucion.model.Inventario;
 import com.dwi.intranetdistribucion.model.Pedido;
 import com.dwi.intranetdistribucion.model.Producto;
 import com.dwi.intranetdistribucion.model.Usuario;
 import com.dwi.intranetdistribucion.repository.AlmacenRepository;
+import com.dwi.intranetdistribucion.repository.AprobacionPedidoRepository;
 import com.dwi.intranetdistribucion.repository.DetallePedidoRepository;
 import com.dwi.intranetdistribucion.repository.InventarioRepository;
 import com.dwi.intranetdistribucion.repository.PedidoRepository;
@@ -47,6 +51,7 @@ public class PedidoServiceImpl implements PedidoService {
     private final ProductoRepository productoRepository;
     private final InventarioRepository inventarioRepository;
     private final UsuarioRepository usuarioRepository;
+    private final AprobacionPedidoRepository aprobacionPedidoRepository; // Añadido para RF-11
 
     @Override
     @Transactional(readOnly = true)
@@ -147,6 +152,53 @@ public class PedidoServiceImpl implements PedidoService {
         detallePedidoRepository.saveAll(detalles);
 
         return armarRespuesta(pedido, detalles);
+    }
+
+    @Override
+    @Transactional
+    public AprobacionPedidoResponseDTO aprobarRechazarPedido(Long idPedido, AprobacionPedidoRequestDTO request, String emailUsuario) {
+        if (emailUsuario == null || emailUsuario.isBlank()) {
+            throw new BadRequestException("No se pudo identificar al usuario autenticado");
+        }
+        Usuario usuario = usuarioRepository.findByCorreoIgnoreCase(emailUsuario)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado: " + emailUsuario));
+
+        Pedido pedido = buscarPedido(idPedido);
+
+        if (!ESTADO_PENDIENTE.equals(pedido.getIdEstadoPedido())) {
+            throw new BadRequestException("El pedido ya ha sido procesado anteriormente o no se encuentra en estado Pendiente.");
+        }
+
+        if (aprobacionPedidoRepository.existsByPedidoIdPedido(idPedido)) {
+            throw new BadRequestException("Ya existe una decisión registrada para este pedido.");
+        }
+
+        boolean esRechazado = "RECHAZADO".equalsIgnoreCase(request.getDecision());
+        if (esRechazado && (request.getMotivo() == null || request.getMotivo().isBlank())) {
+            throw new BadRequestException("Debe especificar un motivo para el rechazo del pedido.");
+        }
+
+        // Definir nuevo ID de estado (2 = Aprobado, 3 = Rechazado según catálogos habituales)
+        Short nuevoEstadoId = esRechazado ? (short) 3 : (short) 2;
+        pedido.setIdEstadoPedido(nuevoEstadoId);
+        pedidoRepository.save(pedido);
+
+        AprobacionPedido aprobacion = aprobacionPedidoRepository.save(AprobacionPedido.builder()
+                .pedido(pedido)
+                .usuario(usuario)
+                .decision(request.getDecision().toUpperCase())
+                .motivo(normalizar(request.getMotivo()))
+                .fecha(OffsetDateTime.now())
+                .build());
+
+        return AprobacionPedidoResponseDTO.builder()
+                .idAprobacion(aprobacion.getIdAprobacion())
+                .idPedido(pedido.getIdPedido())
+                .decision(aprobacion.getDecision())
+                .motivo(aprobacion.getMotivo())
+                .usuarioAprobador(usuario.getNombres() + " " + usuario.getApellidos())
+                .fecha(aprobacion.getFecha())
+                .build();
     }
 
     @Override

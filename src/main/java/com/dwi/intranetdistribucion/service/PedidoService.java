@@ -1,6 +1,8 @@
 package com.dwi.intranetdistribucion.service;
 
+import com.dwi.intranetdistribucion.dto.request.AprobacionPedidoRequestDTO;
 import com.dwi.intranetdistribucion.dto.request.PedidoRequestDTO;
+import com.dwi.intranetdistribucion.dto.response.AprobacionPedidoResponseDTO;
 import com.dwi.intranetdistribucion.dto.response.ClienteOpcionDTO;
 import com.dwi.intranetdistribucion.dto.response.PedidoResponseDTO;
 import com.dwi.intranetdistribucion.dto.response.PedidoResumenDTO;
@@ -15,6 +17,8 @@ public interface PedidoService {
     PedidoResponseDTO obtenerPorId(Long id);
 
     PedidoResponseDTO crear(PedidoRequestDTO request, String emailUsuario);
+
+    AprobacionPedidoResponseDTO aprobarRechazarPedido(Long idPedido, AprobacionPedidoRequestDTO request, String emailUsuario);
 
     void eliminar(Long id);
 
