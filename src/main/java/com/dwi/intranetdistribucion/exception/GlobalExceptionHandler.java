@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -63,6 +64,11 @@ public class GlobalExceptionHandler {
                 webRequest.getDescription(false)
         );
         return new ResponseEntity<>(errorDetails, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(DisabledException.class)
+    public ResponseEntity<ErrorDetails> manejarDisabledException(DisabledException exception, WebRequest webRequest) {
+        return construirRespuesta("La cuenta está desactivada. Contacte al administrador.", webRequest, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(LockedException.class)
