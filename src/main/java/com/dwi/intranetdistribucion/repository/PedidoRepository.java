@@ -1,8 +1,11 @@
 package com.dwi.intranetdistribucion.repository;
 
 import com.dwi.intranetdistribucion.model.Pedido;
+import com.dwi.intranetdistribucion.repository.projection.ClienteOpcionView;
 import com.dwi.intranetdistribucion.repository.projection.PedidoCabeceraView;
 import com.dwi.intranetdistribucion.repository.projection.PedidoDetalleView;
+import com.dwi.intranetdistribucion.repository.projection.PedidoResumenView;
+import com.dwi.intranetdistribucion.repository.projection.ProductoDisponibleView;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -70,4 +73,58 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
             ORDER BY pr.nombre
             """, nativeQuery = true)
     List<PedidoDetalleView> obtenerDetalle(@Param("idPedido") Long idPedido);
+
+    @Query(value = """
+            SELECT p.id_pedido AS "idPedido",
+                   c.nombre_razon_social AS "cliente",
+                   a.nombre AS "almacen",
+                   CAST(p.id_estado_pedido AS integer) AS "idEstadoPedido",
+                   ep.nombre AS "estado",
+                   to_char(p.fecha_pedido AT TIME ZONE 'America/Lima', 'DD/MM/YYYY HH24:MI') AS "fechaPedido",
+                   COALESCE(SUM(dp.cantidad * dp.precio_unitario), 0) AS "total"
+            FROM pedido p
+            JOIN cliente c ON c.id_cliente = p.id_cliente
+            JOIN almacen a ON a.id_almacen = p.id_almacen
+            JOIN estado_pedido ep ON ep.id_estado_pedido = p.id_estado_pedido
+            LEFT JOIN detalle_pedido dp ON dp.id_pedido = p.id_pedido
+            WHERE (CAST(:idEstado AS integer) IS NULL OR p.id_estado_pedido = :idEstado)
+            GROUP BY p.id_pedido, c.nombre_razon_social, a.nombre, p.id_estado_pedido, ep.nombre, p.fecha_pedido
+            ORDER BY p.id_pedido DESC
+            """, nativeQuery = true)
+    List<PedidoResumenView> listarResumen(@Param("idEstado") Integer idEstado);
+
+    @Query(value = """
+            SELECT c.id_cliente AS "idCliente",
+                   c.nombre_razon_social AS "nombre",
+                   c.numero_documento AS "documento"
+            FROM cliente c
+            WHERE c.activo = TRUE
+            ORDER BY c.nombre_razon_social
+            """, nativeQuery = true)
+    List<ClienteOpcionView> listarClientes();
+
+    @Query(value = "SELECT nombre_razon_social FROM cliente WHERE id_cliente = :idCliente AND activo = TRUE",
+            nativeQuery = true)
+    Optional<String> obtenerNombreClienteActivo(@Param("idCliente") Integer idCliente);
+
+    @Query(value = "SELECT nombre_razon_social FROM cliente WHERE id_cliente = :idCliente", nativeQuery = true)
+    Optional<String> obtenerNombreCliente(@Param("idCliente") Integer idCliente);
+
+    @Query(value = "SELECT nombre FROM estado_pedido WHERE id_estado_pedido = :idEstado", nativeQuery = true)
+    Optional<String> obtenerNombreEstado(@Param("idEstado") Integer idEstado);
+
+    @Query(value = """
+            SELECT p.id_producto AS "idProducto",
+                   p.codigo AS "codigo",
+                   p.nombre AS "producto",
+                   p.precio_unitario AS "precioUnitario",
+                   i.stock_actual AS "stockActual"
+            FROM inventario i
+            JOIN producto p ON p.id_producto = i.id_producto
+            WHERE i.id_almacen = :idAlmacen
+              AND p.activo = TRUE
+              AND i.stock_actual > 0
+            ORDER BY p.nombre
+            """, nativeQuery = true)
+    List<ProductoDisponibleView> listarProductosDisponibles(@Param("idAlmacen") Integer idAlmacen);
 }
