@@ -45,6 +45,10 @@ public class CustomUserDetailsService implements UserDetailsService {
         return new User(
                 usuario.getEmail(),
                 usuario.getPassword(),
+                Boolean.TRUE.equals(usuario.getActivo()),
+                true,
+                true,
+                true,
                 authorities
         );
     }
