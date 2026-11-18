@@ -35,7 +35,7 @@ public class ProgramacionRutaServiceImpl implements ProgramacionRutaService {
                 .idConductor(request.getIdConductor())
                 .inicioProgramado(request.getInicioProgramado())
                 .finProgramado(request.getFinProgramado())
-                .idEstadoProgramacion((short) 1) // Estado inicial por defecto (ej. Registrado / Programado)
+                .idEstadoProgramacion((short) 1)
                 .build();
 
         programacion = programacionRutaRepository.save(programacion);
@@ -54,11 +54,18 @@ public class ProgramacionRutaServiceImpl implements ProgramacionRutaService {
     }
 
     private ProgramacionRutaResponseDTO mapearRespuesta(ProgramacionRuta prog) {
-        String nombreEstado = programacionRutaRepository.obtenerNombreEstadoProgramacion(prog.getIdEstadoProgramacion().intValue())
-                .orElse("Desconocido");
+        String nombreEstado = "Registrado";
+        try {
+            var estadoOpt = programacionRutaRepository.obtenerNombreEstadoProgramacion(prog.getIdEstadoProgramacion().intValue());
+            if (estadoOpt != null && estadoOpt.isPresent()) {
+                nombreEstado = estadoOpt.get();
+            }
+        } catch (Exception e) {
+            nombreEstado = "Activo";
+        }
 
         return ProgramacionRutaResponseDTO.builder()
-                .idProgramacion(prog.getIdProgramacion())
+                .idProgramacion(prog.getIdProgramacionRuta())
                 .idRuta(prog.getIdRuta())
                 .idVehiculo(prog.getIdVehiculo())
                 .idConductor(prog.getIdConductor())

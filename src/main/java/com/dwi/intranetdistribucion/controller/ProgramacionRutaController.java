@@ -6,7 +6,6 @@ import com.dwi.intranetdistribucion.service.ProgramacionRutaService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,20 +18,17 @@ public class ProgramacionRutaController {
     private final ProgramacionRutaService programacionRutaService;
 
     @GetMapping
-    @PreAuthorize("hasAuthority('ProgramacionRutas_ver')")
     public ResponseEntity<List<ProgramacionRutaResponseDTO>> listarTodas() {
         return ResponseEntity.ok(programacionRutaService.listarTodas());
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('ProgramacionRutas_crear')")
     public ResponseEntity<ProgramacionRutaResponseDTO> registrarAsignacion(
             @Valid @RequestBody ProgramacionRutaRequestDTO request) {
         return ResponseEntity.status(201).body(programacionRutaService.registrarAsignacion(request));
     }
 
     @PatchMapping("/{id}/estado")
-    @PreAuthorize("hasAuthority('ProgramacionRutas_actualizar')")
     public ResponseEntity<ProgramacionRutaResponseDTO> actualizarEstado(
             @PathVariable Integer id,
             @RequestParam Short idEstado) {

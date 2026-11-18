@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = "programacion_ruta")
+@Table(name = "programacion_ruta", schema = "public")
 @Data
 @Builder
 @NoArgsConstructor
@@ -17,8 +17,8 @@ public class ProgramacionRuta {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_programacion")
-    private Integer idProgramacion;
+    @Column(name = "id_programacion_ruta")
+    private Integer idProgramacionRuta;
 
     @Column(name = "id_ruta", nullable = false)
     private Integer idRuta;
