@@ -1,22 +1,22 @@
 package com.dwi.intranetdistribucion.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Immutable;
-
 import java.time.OffsetDateTime;
 
-// Vista de solo lectura de public.entrega: este módulo solo la consulta y la vincula.
-// Pedido y programación se exponen como ids hasta que existan sus entidades.
 @Entity
 @Table(name = "entrega")
-@Immutable
-@Getter
+@Data
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class Entrega {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_entrega")
     private Long idEntrega;
 
