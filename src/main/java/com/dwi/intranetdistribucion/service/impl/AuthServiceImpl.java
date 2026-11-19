@@ -78,9 +78,16 @@ public class AuthServiceImpl implements AuthService {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 String token = jwtTokenProvider.generarToken(authentication);
 
+                String rolNombre = usuario.getRol() != null ? usuario.getRol().getNombre() : "OPERADOR";
+                String nombreCompleto = ((usuario.getNombres() != null ? usuario.getNombres() + " " : "") +
+                        (usuario.getApellidos() != null ? usuario.getApellidos() : "")).trim();
+
                 return JwtAuthResponseDTO.builder()
                         .accessToken(token)
                         .tokenType("Bearer")
+                        .rol(rolNombre)
+                        .correo(usuario.getCorreo())
+                        .nombreCompleto(nombreCompleto.isEmpty() ? usuario.getUsername() : nombreCompleto)
                         .build();
 
             } catch (BadCredentialsException ex) {
