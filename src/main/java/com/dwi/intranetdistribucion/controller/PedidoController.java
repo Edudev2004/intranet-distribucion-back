@@ -1,6 +1,8 @@
 package com.dwi.intranetdistribucion.controller;
 
+import com.dwi.intranetdistribucion.dto.request.AprobacionPedidoRequestDTO;
 import com.dwi.intranetdistribucion.dto.request.PedidoRequestDTO;
+import com.dwi.intranetdistribucion.dto.response.AprobacionPedidoResponseDTO;
 import com.dwi.intranetdistribucion.dto.response.ClienteOpcionDTO;
 import com.dwi.intranetdistribucion.dto.response.PedidoResponseDTO;
 import com.dwi.intranetdistribucion.dto.response.PedidoResumenDTO;
@@ -50,8 +52,26 @@ public class PedidoController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable("id") Long id) {
+    public ResponseEntity<Void> eliminar(@PathVariable(name = "id") Long id) {
         pedidoService.eliminar(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/aprobacion")
+    public ResponseEntity<AprobacionPedidoResponseDTO> aprobarRechazar(
+            @PathVariable(name = "id") Long id,
+            @Valid @RequestBody AprobacionPedidoRequestDTO request,
+            Principal principal) {
+        String email = (principal != null) ? principal.getName() : null;
+        return ResponseEntity.ok(pedidoService.aprobarRechazarPedido(id, request, email));
+    }
+
+    @GetMapping("/{id}/aprobacion")
+    public ResponseEntity<AprobacionPedidoResponseDTO> obtenerAprobacion(@PathVariable(name = "id") Long id) {
+        AprobacionPedidoResponseDTO aprobacion = pedidoService.obtenerAprobacion(id);
+        if (aprobacion == null) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(aprobacion);
     }
 }

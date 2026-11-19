@@ -163,6 +163,18 @@ public class PedidoServiceImpl implements PedidoService {
         Usuario usuario = usuarioRepository.findByCorreoIgnoreCase(emailUsuario)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado: " + emailUsuario));
 
+        boolean tienePermiso = usuario.getRol() != null && (
+                "ADMIN".equalsIgnoreCase(usuario.getRol().getNombre()) ||
+                "SUPERVISOR".equalsIgnoreCase(usuario.getRol().getNombre()) ||
+                usuario.getRol().getNombre().toUpperCase().contains("SUPERVISOR") ||
+                "ALMACENERO".equalsIgnoreCase(usuario.getRol().getNombre()) ||
+                (usuario.getRol().getPermisos() != null && usuario.getRol().getPermisos().stream()
+                        .anyMatch(p -> "PEDIDOS_APROBAR".equalsIgnoreCase(p.getNombre())))
+        );
+        if (!tienePermiso) {
+            throw new BadRequestException("Solo un usuario con rol de Supervisor o permisos de aprobación puede aprobar o rechazar pedidos.");
+        }
+
         Pedido pedido = buscarPedido(idPedido);
 
         if (!ESTADO_PENDIENTE.equals(pedido.getIdEstadoPedido())) {
@@ -199,6 +211,21 @@ public class PedidoServiceImpl implements PedidoService {
                 .usuarioAprobador(usuario.getNombres() + " " + usuario.getApellidos())
                 .fecha(aprobacion.getFecha())
                 .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public AprobacionPedidoResponseDTO obtenerAprobacion(Long idPedido) {
+        return aprobacionPedidoRepository.findByPedidoIdPedido(idPedido)
+                .map(a -> AprobacionPedidoResponseDTO.builder()
+                        .idAprobacion(a.getIdAprobacion())
+                        .idPedido(a.getPedido().getIdPedido())
+                        .decision(a.getDecision())
+                        .motivo(a.getMotivo())
+                        .usuarioAprobador(a.getUsuario() != null ? (a.getUsuario().getNombres() + " " + a.getUsuario().getApellidos()) : null)
+                        .fecha(a.getFecha())
+                        .build())
+                .orElse(null);
     }
 
     @Override
@@ -279,6 +306,7 @@ public class PedidoServiceImpl implements PedidoService {
                 .observacion(pedido.getObservacion())
                 .total(total)
                 .detalles(lineas)
+                .aprobacion(obtenerAprobacion(pedido.getIdPedido()))
                 .build();
     }
 
