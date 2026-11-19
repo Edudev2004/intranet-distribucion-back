@@ -18,6 +18,8 @@ import java.util.Optional;
 @Repository
 public interface PedidoRepository extends JpaRepository<Pedido, Long> {
 
+    long countByIdEstadoPedido(Short idEstadoPedido);
+
     @Query(value = """
             SELECT p.id_pedido AS "idPedido",
                    to_char(p.fecha_pedido AT TIME ZONE 'America/Lima', 'DD/MM/YYYY HH24:MI') AS "fechaPedido",
