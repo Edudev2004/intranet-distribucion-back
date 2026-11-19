@@ -18,5 +18,6 @@ public interface ProgramacionRutaService {
     List<PedidoDisponibleAsignacionDTO> listarPedidosDisponibles(Integer idAlmacen, Integer idZona);
     ResumenCargaRutaDTO obtenerResumenCarga(Integer idProgramacion);
     AsignacionPedidosResponseDTO asignarPedidosARuta(Integer idProgramacion, AsignarPedidosRequestDTO request);
+    AsignacionPedidosResponseDTO autoAsignarPedidosARuta(Integer idProgramacion);
     void desasignarPedidoDeRuta(Integer idProgramacion, Long idPedido);
 }
