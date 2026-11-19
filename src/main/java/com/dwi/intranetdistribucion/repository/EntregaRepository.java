@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,6 +14,14 @@ import java.util.Optional;
 public interface EntregaRepository extends JpaRepository<Entrega, Long> {
 
     List<Entrega> findByIdProgramacion(Integer idProgramacion);
+
+    List<Entrega> findByIdProgramacionOrderByOrdenVisitaAsc(Integer idProgramacion);
+
+    Optional<Entrega> findByIdProgramacionAndIdPedido(Integer idProgramacion, Long idPedido);
+
+    boolean existsByIdPedidoAndIdEstadoEntregaIn(Long idPedido, Collection<Short> estados);
+
+    void deleteByIdProgramacionAndIdPedido(Integer idProgramacion, Long idPedido);
 
     @Query("SELECT e.nombre FROM EstadoEntrega e WHERE e.idEstadoEntrega = :idEstado")
     Optional<String> obtenerNombreEstadoEntrega(@Param("idEstado") Integer idEstado);

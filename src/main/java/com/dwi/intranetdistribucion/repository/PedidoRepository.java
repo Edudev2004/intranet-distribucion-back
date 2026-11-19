@@ -153,4 +153,39 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
             ORDER BY p.nombre
             """, nativeQuery = true)
     List<ProductoDisponibleView> listarProductosDisponibles(@Param("idAlmacen") Integer idAlmacen);
+
+    @Query(value = """
+            SELECT p.id_pedido AS "idPedido",
+                   p.id_cliente AS "idCliente",
+                   c.nombre_razon_social AS "cliente",
+                   c.numero_documento AS "numeroDocumentoCliente",
+                   c.direccion AS "direccionEntrega",
+                   z.nombre AS "zonaCliente",
+                   p.id_almacen AS "idAlmacen",
+                   a.nombre AS "almacen",
+                   CAST(p.id_estado_pedido AS smallint) AS "idEstadoPedido",
+                   ep.nombre AS "estado",
+                   p.fecha_pedido AS "fechaPedido",
+                   p.fecha_entrega_solicitada AS "fechaEntregaSolicitada",
+                   COALESCE(SUM(dp.cantidad * COALESCE(prod.peso_kg, 0)), 0) AS "pesoTotalKg",
+                   COALESCE(SUM(dp.cantidad * dp.precio_unitario), 0) AS "importeTotal"
+            FROM pedido p
+            JOIN cliente c ON c.id_cliente = p.id_cliente
+            LEFT JOIN zona z ON z.id_zona = c.id_zona
+            JOIN almacen a ON a.id_almacen = p.id_almacen
+            JOIN estado_pedido ep ON ep.id_estado_pedido = p.id_estado_pedido
+            LEFT JOIN detalle_pedido dp ON dp.id_pedido = p.id_pedido
+            LEFT JOIN producto prod ON prod.id_producto = dp.id_producto
+            WHERE p.id_estado_pedido = 2
+              AND p.id_pedido NOT IN (
+                  SELECT e.id_pedido FROM entrega e WHERE e.id_estado_entrega IN (1, 2, 3)
+              )
+              AND (CAST(:idAlmacen AS integer) IS NULL OR p.id_almacen = :idAlmacen)
+              AND (CAST(:idZona AS integer) IS NULL OR c.id_zona = :idZona)
+            GROUP BY p.id_pedido, p.id_cliente, c.nombre_razon_social, c.numero_documento, c.direccion, z.nombre, p.id_almacen, a.nombre, p.id_estado_pedido, ep.nombre, p.fecha_pedido, p.fecha_entrega_solicitada
+            ORDER BY p.id_pedido ASC
+            """, nativeQuery = true)
+    List<com.dwi.intranetdistribucion.repository.projection.PedidoDisponibleAsignacionView> listarPedidosDisponiblesParaRuta(
+            @Param("idAlmacen") Integer idAlmacen,
+            @Param("idZona") Integer idZona);
 }
