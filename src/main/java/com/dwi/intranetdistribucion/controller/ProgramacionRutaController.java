@@ -62,6 +62,11 @@ public class ProgramacionRutaController {
         return ResponseEntity.ok(programacionRutaService.asignarPedidosARuta(id, request));
     }
 
+    @PostMapping("/{id}/auto-asignar-pedidos")
+    public ResponseEntity<AsignacionPedidosResponseDTO> autoAsignarPedidos(@PathVariable("id") Integer id) {
+        return ResponseEntity.ok(programacionRutaService.autoAsignarPedidosARuta(id));
+    }
+
     @DeleteMapping("/{id}/pedidos/{idPedido}")
     public ResponseEntity<Void> desasignarPedido(
             @PathVariable("id") Integer id,

@@ -29,6 +29,8 @@ public class ProgramacionRutaServiceImpl implements ProgramacionRutaService {
     private final DetallePedidoRepository detallePedidoRepository;
     private final ProductoRepository productoRepository;
     private final VehiculoRepository vehiculoRepository;
+    private final RutaRepository rutaRepository;
+    private final ConductorRepository conductorRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -229,6 +231,70 @@ public class ProgramacionRutaServiceImpl implements ProgramacionRutaService {
 
     @Override
     @Transactional
+    public AsignacionPedidosResponseDTO autoAsignarPedidosARuta(Integer idProgramacion) {
+        ProgramacionRuta programacion = programacionRutaRepository.findById(idProgramacion)
+                .orElseThrow(() -> new ResourceNotFoundException("Programación de ruta no encontrada con ID: " + idProgramacion));
+
+        Vehiculo vehiculo = vehiculoRepository.findById(programacion.getIdVehiculo())
+                .orElseThrow(() -> new ResourceNotFoundException("Vehículo no encontrado con ID: " + programacion.getIdVehiculo()));
+
+        BigDecimal capacidadMaxima = vehiculo.getCapacidadKg() != null ? vehiculo.getCapacidadKg() : BigDecimal.ZERO;
+
+        // Carga actual
+        List<Entrega> entregasExistentes = entregaRepository.findByIdProgramacion(idProgramacion);
+        BigDecimal pesoOcupadoActual = BigDecimal.ZERO;
+        for (Entrega entrega : entregasExistentes) {
+            if (entrega.getIdPedido() != null) {
+                pesoOcupadoActual = pesoOcupadoActual.add(calcularPesoPedido(entrega.getIdPedido()));
+            }
+        }
+
+        BigDecimal capacidadDisponible = capacidadMaxima.subtract(pesoOcupadoActual);
+        if (capacidadDisponible.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BadRequestException(String.format("La ruta ya ha alcanzado o superado su capacidad máxima (%.2f kg). Capacidad disponible: 0.00 kg.", capacidadMaxima));
+        }
+
+        // Obtener la zona de la ruta si existe
+        Integer idZona = null;
+        if (programacion.getIdRuta() != null) {
+            var rutaOpt = rutaRepository.findById(programacion.getIdRuta());
+            if (rutaOpt.isPresent() && rutaOpt.get().getZona() != null) {
+                idZona = rutaOpt.get().getZona().getIdZona();
+            }
+        }
+
+        List<PedidoDisponibleAsignacionDTO> disponibles = listarPedidosDisponibles(null, idZona);
+        if (disponibles.isEmpty() && idZona != null) {
+            // Si no hay pedidos en la zona exacta, buscar pedidos de cualquier zona
+            disponibles = listarPedidosDisponibles(null, null);
+        }
+
+        if (disponibles.isEmpty()) {
+            throw new BadRequestException("No hay pedidos aprobados pendientes de asignación en el sistema.");
+        }
+
+        List<Long> pedidosParaAsignar = new ArrayList<>();
+        BigDecimal pesoAcumulado = BigDecimal.ZERO;
+
+        for (PedidoDisponibleAsignacionDTO pedido : disponibles) {
+            BigDecimal pesoPedido = pedido.getPesoTotalKg() != null ? pedido.getPesoTotalKg() : BigDecimal.ZERO;
+            if (pesoAcumulado.add(pesoPedido).compareTo(capacidadDisponible) <= 0) {
+                pedidosParaAsignar.add(pedido.getIdPedido());
+                pesoAcumulado = pesoAcumulado.add(pesoPedido);
+            }
+        }
+
+        if (pedidosParaAsignar.isEmpty()) {
+            throw new BadRequestException(String.format("Ninguno de los pedidos disponibles cabe en el espacio de carga restante (%.2f kg disponibles).", capacidadDisponible));
+        }
+
+        AsignarPedidosRequestDTO req = new AsignarPedidosRequestDTO();
+        req.setIdPedidos(pedidosParaAsignar);
+        return asignarPedidosARuta(idProgramacion, req);
+    }
+
+    @Override
+    @Transactional
     public void desasignarPedidoDeRuta(Integer idProgramacion, Long idPedido) {
         Entrega entrega = entregaRepository.findByIdProgramacionAndIdPedido(idProgramacion, idPedido)
                 .orElseThrow(() -> new ResourceNotFoundException("No se encontró la entrega para el pedido #" + idPedido + " en la ruta #" + idProgramacion));
@@ -300,17 +366,90 @@ public class ProgramacionRutaServiceImpl implements ProgramacionRutaService {
             nombreEstado = "Activo";
         }
 
+        String nombreRuta = "Ruta #" + prog.getIdRuta();
+        String nombreZona = "General";
+        try {
+            if (prog.getIdRuta() != null) {
+                var rutaOpt = rutaRepository.findById(prog.getIdRuta());
+                if (rutaOpt.isPresent()) {
+                    var r = rutaOpt.get();
+                    nombreRuta = r.getNombre();
+                    if (r.getZona() != null) {
+                        nombreZona = r.getZona().getNombre();
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+
+        String placa = "VEH-" + prog.getIdVehiculo();
+        String modelo = "Vehículo de Carga";
+        BigDecimal capacidad = BigDecimal.ZERO;
+        try {
+            if (prog.getIdVehiculo() != null) {
+                var vehOpt = vehiculoRepository.findById(prog.getIdVehiculo());
+                if (vehOpt.isPresent()) {
+                    var v = vehOpt.get();
+                    placa = v.getPlaca();
+                    modelo = (v.getMarca() != null ? v.getMarca() + " " : "") + (v.getModelo() != null ? v.getModelo() : "");
+                    capacidad = v.getCapacidadKg() != null ? v.getCapacidadKg() : BigDecimal.ZERO;
+                }
+            }
+        } catch (Exception ignored) {}
+
+        String conductor = "Conductor #" + prog.getIdConductor();
+        String dni = null;
+        String licencia = null;
+        try {
+            if (prog.getIdConductor() != null) {
+                var condOpt = conductorRepository.findById(prog.getIdConductor());
+                if (condOpt.isPresent()) {
+                    var c = condOpt.get();
+                    conductor = c.getNombres() + " " + c.getApellidos();
+                    dni = c.getDni();
+                    licencia = c.getNroLicencia();
+                }
+            }
+        } catch (Exception ignored) {}
+
+        BigDecimal pesoOcupado = BigDecimal.ZERO;
+        int totalEntregas = 0;
+        try {
+            List<Entrega> entregas = entregaRepository.findByIdProgramacion(prog.getIdProgramacionRuta());
+            totalEntregas = entregas.size();
+            for (Entrega e : entregas) {
+                if (e.getIdPedido() != null) {
+                    pesoOcupado = pesoOcupado.add(calcularPesoPedido(e.getIdPedido()));
+                }
+            }
+        } catch (Exception ignored) {}
+
+        BigDecimal porcentaje = BigDecimal.ZERO;
+        if (capacidad.compareTo(BigDecimal.ZERO) > 0) {
+            porcentaje = pesoOcupado.multiply(BigDecimal.valueOf(100)).divide(capacidad, 1, RoundingMode.HALF_UP);
+        }
+
         return ProgramacionRutaResponseDTO.builder()
                 .idProgramacion(prog.getIdProgramacionRuta())
                 .idRuta(prog.getIdRuta())
+                .nombreRuta(nombreRuta)
+                .nombreZona(nombreZona)
                 .idVehiculo(prog.getIdVehiculo())
+                .placaVehiculo(placa)
+                .modeloVehiculo(modelo)
+                .capacidadVehiculoKg(capacidad)
                 .idConductor(prog.getIdConductor())
+                .nombreConductor(conductor)
+                .dniConductor(dni)
+                .licenciaConductor(licencia)
                 .inicioProgramado(prog.getInicioProgramado())
                 .finProgramado(prog.getFinProgramado())
                 .inicioReal(prog.getInicioReal())
                 .finReal(prog.getFinReal())
                 .idEstadoProgramacion(prog.getIdEstadoProgramacion())
                 .estadoProgramacion(nombreEstado)
+                .pesoOcupadoKg(pesoOcupado)
+                .porcentajeOcupacion(porcentaje)
+                .totalPedidos(totalEntregas)
                 .build();
     }
 }
