@@ -48,6 +48,14 @@ tasks.named('test') {
 	useJUnitPlatform()
 }
 
+tasks.named('jar') {
+	enabled = false
+}
+
+bootJar {
+	archiveFileName = 'app.jar'
+}
+
 bootRun {
 	jvmArgs = ['-Xmx384m']
 }

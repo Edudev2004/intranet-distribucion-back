@@ -1,0 +1,11 @@
+.git
+.gradle
+build
+bin
+.settings
+*.log
+.env
+.idea
+.vscode
+hs_err_*.log
+replay_*.log
