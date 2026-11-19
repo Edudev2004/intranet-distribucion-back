@@ -38,4 +38,7 @@ out/
 
 ### Environment Variables ###
 .env
+*.log
+intranet-backust.sql
+intranet-backus.txt
 
