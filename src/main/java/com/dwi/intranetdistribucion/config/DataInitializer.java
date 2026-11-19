@@ -25,6 +25,7 @@ public class DataInitializer implements CommandLineRunner {
     private final TipoMovimientoRepository tipoMovimientoRepository;
     private final TipoIncidenciaRepository tipoIncidenciaRepository;
     private final EstadoEntregaRepository estadoEntregaRepository;
+    private final TipoDocumentoRepository tipoDocumentoRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -139,6 +140,20 @@ public class DataInitializer implements CommandLineRunner {
         crearTipoIncidenciaSiNoExiste("Mercadería Dañada / Averiada");
         crearTipoIncidenciaSiNoExiste("Problema Vehicular / Mecánico");
         crearTipoIncidenciaSiNoExiste("Otro Motivo");
+
+        // 9. Inicializar Tipos de Documento para Clientes (RF-09)
+        crearTipoDocumentoSiNoExiste("DNI");
+        crearTipoDocumentoSiNoExiste("RUC");
+        crearTipoDocumentoSiNoExiste("Carnet de Extranjería");
+        crearTipoDocumentoSiNoExiste("Pasaporte");
+    }
+
+    private void crearTipoDocumentoSiNoExiste(String nombre) {
+        if (tipoDocumentoRepository.findByNombreIgnoreCase(nombre).isEmpty()) {
+            tipoDocumentoRepository.save(TipoDocumento.builder()
+                    .nombre(nombre)
+                    .build());
+        }
     }
 
     private void crearEstadoEntregaSiNoExiste(Short id, String nombre) {
