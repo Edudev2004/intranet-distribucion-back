@@ -22,6 +22,9 @@ public class IncidenciaRequestDTO {
     @Size(max = 500, message = "El comentario no debe superar 500 caracteres")
     private String comentario;
 
+    @Size(max = 500, message = "La URL de evidencia no debe superar 500 caracteres")
+    private String evidenciaUrl;
+
     // Usuario que registra la incidencia; se tomará del token cuando se integre RF-01 (JWT)
     @NotNull(message = "El usuario es obligatorio")
     private Integer idUsuario;

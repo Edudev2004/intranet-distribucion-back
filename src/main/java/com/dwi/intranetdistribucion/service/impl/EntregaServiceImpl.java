@@ -5,6 +5,7 @@ import com.dwi.intranetdistribucion.dto.response.EntregaResponseDTO;
 import com.dwi.intranetdistribucion.exception.ResourceNotFoundException;
 import com.dwi.intranetdistribucion.model.Entrega;
 import com.dwi.intranetdistribucion.repository.EntregaRepository;
+import com.dwi.intranetdistribucion.repository.PedidoRepository;
 import com.dwi.intranetdistribucion.service.EntregaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import java.util.List;
 public class EntregaServiceImpl implements EntregaService {
 
     private final EntregaRepository entregaRepository;
+    private final PedidoRepository pedidoRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -33,13 +35,21 @@ public class EntregaServiceImpl implements EntregaService {
         Entrega entrega = entregaRepository.findById(idEntrega)
                 .orElseThrow(() -> new ResourceNotFoundException("Entrega no encontrada con id: " + idEntrega));
 
-        // Actualizamos directamente el ID del estado recibido
         entrega.setIdEstadoEntrega(request.getIdEstadoEntrega());
 
-        // Si el estado es el correspondiente a entregado (por ejemplo, id = 2 o según convención de la BD), 
-        // registramos la hora real automáticamente si no estaba registrada.
-        // O si manejas el ID directamente: (Ej: si id 2 es Entregado)
-        if (request.getIdEstadoEntrega().equals((short) 2) && entrega.getHoraEntregaReal() == null) {
+        if (request.getFotoEntregaUrl() != null) {
+            entrega.setFotoEntregaUrl(request.getFotoEntregaUrl());
+        }
+        if (request.getFotoGuiaUrl() != null) {
+            entrega.setFotoGuiaUrl(request.getFotoGuiaUrl());
+        }
+        if (request.getNotas() != null) {
+            entrega.setNotas(request.getNotas());
+        }
+
+        // Si el estado es Entregado (id = 3 o 2 según convención) y horaEntregaReal es null
+        if ((request.getIdEstadoEntrega().equals((short) 2) || request.getIdEstadoEntrega().equals((short) 3))
+                && entrega.getHoraEntregaReal() == null) {
             entrega.setHoraEntregaReal(OffsetDateTime.now());
         }
 
@@ -48,9 +58,25 @@ public class EntregaServiceImpl implements EntregaService {
     }
 
     private EntregaResponseDTO mapearRespuesta(Entrega entrega) {
-        // Obtenemos el nombre del estado mediante la consulta del repositorio
         String nombreEstado = entregaRepository.obtenerNombreEstadoEntrega(entrega.getIdEstadoEntrega().intValue())
                 .orElse("Desconocido");
+
+        String cliente = null;
+        String direccion = null;
+        String telefono = null;
+
+        if (entrega.getIdPedido() != null) {
+            try {
+                var cabeceraOpt = pedidoRepository.obtenerCabecera(entrega.getIdPedido());
+                if (cabeceraOpt.isPresent()) {
+                    var c = cabeceraOpt.get();
+                    cliente = c.getCliente();
+                    direccion = c.getDireccionCliente();
+                    telefono = c.getTelefonoCliente();
+                }
+            } catch (Exception ignored) {
+            }
+        }
 
         return EntregaResponseDTO.builder()
                 .idEntrega(entrega.getIdEntrega())
@@ -61,6 +87,12 @@ public class EntregaServiceImpl implements EntregaService {
                 .ordenVisita(entrega.getOrdenVisita())
                 .horaEstimada(entrega.getHoraEstimada())
                 .horaEntregaReal(entrega.getHoraEntregaReal())
+                .fotoEntregaUrl(entrega.getFotoEntregaUrl())
+                .fotoGuiaUrl(entrega.getFotoGuiaUrl())
+                .notas(entrega.getNotas())
+                .cliente(cliente)
+                .direccionCliente(direccion)
+                .telefonoCliente(telefono)
                 .build();
     }
 }
