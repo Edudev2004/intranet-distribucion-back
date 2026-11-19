@@ -13,4 +13,7 @@ public class JwtAuthResponseDTO {
     private String accessToken;
     @Builder.Default
     private String tokenType = "Bearer";
+    private String rol;
+    private String correo;
+    private String nombreCompleto;
 }
