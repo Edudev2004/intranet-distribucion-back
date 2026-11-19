@@ -15,4 +15,10 @@ public class EntregaResponseDTO {
     private Short ordenVisita;
     private OffsetDateTime horaEstimada;
     private OffsetDateTime horaEntregaReal;
+    private String fotoEntregaUrl;
+    private String fotoGuiaUrl;
+    private String notas;
+    private String cliente;
+    private String direccionCliente;
+    private String telefonoCliente;
 }

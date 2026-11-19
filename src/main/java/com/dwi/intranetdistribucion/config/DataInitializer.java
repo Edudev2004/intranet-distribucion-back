@@ -23,6 +23,8 @@ public class DataInitializer implements CommandLineRunner {
     private final PermisoRepository permisoRepository;
     private final SedeRepository sedeRepository;
     private final TipoMovimientoRepository tipoMovimientoRepository;
+    private final TipoIncidenciaRepository tipoIncidenciaRepository;
+    private final EstadoEntregaRepository estadoEntregaRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -51,6 +53,10 @@ public class DataInitializer implements CommandLineRunner {
         crearPermisoSiNoExiste("REPORTES", "VER");
         crearPermisoSiNoExiste("SEDES", "VER");
         crearPermisoSiNoExiste("SEDES", "GESTIONAR");
+        crearPermisoSiNoExiste("Entregas", "ver");
+        crearPermisoSiNoExiste("Entregas", "actualizar");
+        crearPermisoSiNoExiste("INCIDENCIAS", "VER");
+        crearPermisoSiNoExiste("INCIDENCIAS", "REGISTRAR");
 
         // 3. Inicializar Rol ADMIN con todos los permisos
         Rol rolAdmin = rolRepository.findByNombre("ADMIN").orElseGet(() -> {
@@ -119,6 +125,37 @@ public class DataInitializer implements CommandLineRunner {
         crearTipoMovimientoSiNoExiste("SALIDA_MERMA", 'S');
         crearTipoMovimientoSiNoExiste("SALIDA_AJUSTE", 'S');
         crearTipoMovimientoSiNoExiste("SALIDA_TRASLADO", 'S');
+
+        // 7. Inicializar Estados de Entrega (RF-16)
+        crearEstadoEntregaSiNoExiste((short) 1, "Pendiente");
+        crearEstadoEntregaSiNoExiste((short) 2, "En Ruta");
+        crearEstadoEntregaSiNoExiste((short) 3, "Entregado");
+        crearEstadoEntregaSiNoExiste((short) 4, "No Entregado");
+
+        // 8. Inicializar Tipos de Incidencia (RF-17)
+        crearTipoIncidenciaSiNoExiste("Cliente Ausente / Local Cerrado");
+        crearTipoIncidenciaSiNoExiste("Dirección Errónea / No Ubicada");
+        crearTipoIncidenciaSiNoExiste("Pedido Rechazado por Cliente");
+        crearTipoIncidenciaSiNoExiste("Mercadería Dañada / Averiada");
+        crearTipoIncidenciaSiNoExiste("Problema Vehicular / Mecánico");
+        crearTipoIncidenciaSiNoExiste("Otro Motivo");
+    }
+
+    private void crearEstadoEntregaSiNoExiste(Short id, String nombre) {
+        if (!estadoEntregaRepository.existsById(id)) {
+            estadoEntregaRepository.save(EstadoEntrega.builder()
+                    .idEstadoEntrega(id)
+                    .nombre(nombre)
+                    .build());
+        }
+    }
+
+    private void crearTipoIncidenciaSiNoExiste(String nombre) {
+        if (!tipoIncidenciaRepository.existsByNombreIgnoreCase(nombre)) {
+            tipoIncidenciaRepository.save(TipoIncidencia.builder()
+                    .nombre(nombre)
+                    .build());
+        }
     }
 
     private void crearTipoMovimientoSiNoExiste(String nombre, Character naturaleza) {

@@ -34,6 +34,9 @@ public class Incidencia {
     @Column(name = "comentario", columnDefinition = "varchar")
     private String comentario;
 
+    @Column(name = "evidencia_url", columnDefinition = "varchar")
+    private String evidenciaUrl;
+
     @Column(name = "fecha_hora", nullable = false, updatable = false)
     private OffsetDateTime fechaHora;
 

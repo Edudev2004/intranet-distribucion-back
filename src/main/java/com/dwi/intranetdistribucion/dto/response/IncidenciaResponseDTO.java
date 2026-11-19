@@ -20,6 +20,7 @@ public class IncidenciaResponseDTO {
     private Short idTipoIncidencia;
     private String tipoIncidencia;
     private String comentario;
+    private String evidenciaUrl;
     private OffsetDateTime fechaHora;
     private Integer idUsuario;
     private String username;

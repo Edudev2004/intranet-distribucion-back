@@ -51,6 +51,7 @@ public class IncidenciaServiceImpl implements IncidenciaService {
                 .entrega(entrega)
                 .tipoIncidencia(tipoIncidencia)
                 .comentario(normalizarComentario(request.getComentario()))
+                .evidenciaUrl(request.getEvidenciaUrl())
                 .usuario(usuario)
                 .build();
 
@@ -117,6 +118,7 @@ public class IncidenciaServiceImpl implements IncidenciaService {
                 .idTipoIncidencia(tipo.getIdTipoIncidencia())
                 .tipoIncidencia(tipo.getNombre())
                 .comentario(incidencia.getComentario())
+                .evidenciaUrl(incidencia.getEvidenciaUrl())
                 .fechaHora(incidencia.getFechaHora())
                 .idUsuario(usuario.getIdUsuario())
                 .username(usuario.getUsername())

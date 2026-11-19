@@ -8,4 +8,10 @@ public class ActualizarEntregaRequestDTO {
 
     @NotNull(message = "El estado de entrega es obligatorio")
     private Short idEstadoEntrega;
+
+    private String fotoEntregaUrl;
+
+    private String fotoGuiaUrl;
+
+    private String notas;
 }

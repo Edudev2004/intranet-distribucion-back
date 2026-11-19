@@ -37,4 +37,13 @@ public class Entrega {
 
     @Column(name = "hora_entrega_real")
     private OffsetDateTime horaEntregaReal;
+
+    @Column(name = "foto_entrega_url")
+    private String fotoEntregaUrl;
+
+    @Column(name = "foto_guia_url")
+    private String fotoGuiaUrl;
+
+    @Column(name = "notas")
+    private String notas;
 }
