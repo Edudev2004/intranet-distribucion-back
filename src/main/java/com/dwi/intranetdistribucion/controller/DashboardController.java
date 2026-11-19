@@ -17,7 +17,7 @@ public class DashboardController {
     private final DashboardService dashboardService;
 
     @GetMapping("/kpis")
-    @PreAuthorize("hasAuthority('Dashboard_ver')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<DashboardKpiResponseDTO> obtenerKpis() {
         return ResponseEntity.ok(dashboardService.obtenerIndicadoresGenerales());
     }

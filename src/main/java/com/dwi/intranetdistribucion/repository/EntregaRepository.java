@@ -13,6 +13,8 @@ import java.util.Optional;
 @Repository
 public interface EntregaRepository extends JpaRepository<Entrega, Long> {
 
+    long countByIdEstadoEntrega(Short idEstadoEntrega);
+
     List<Entrega> findByIdProgramacion(Integer idProgramacion);
 
     List<Entrega> findByIdProgramacionOrderByOrdenVisitaAsc(Integer idProgramacion);
