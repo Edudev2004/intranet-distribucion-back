@@ -77,6 +77,7 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         // 4. Inicializar roles base del sistema
+        crearRolSiNoExiste("SUPERVISOR", "Supervisor de operaciones y aprobación de pedidos", List.of("PEDIDOS_VER", "PEDIDOS_APROBAR"));
         crearRolSiNoExiste("ALMACENERO", "Gestión de inventario y despacho", List.of("INVENTARIO_VER", "INVENTARIO_GESTIONAR", "PEDIDOS_APROBAR"));
         crearRolSiNoExiste("CONDUCTOR", "Acceso a rutas asignadas e incidencias", List.of("LOGISTICA_RUTAS"));
         crearRolSiNoExiste("CLIENTE", "Generación y consulta de pedidos", List.of("PEDIDOS_CREAR"));

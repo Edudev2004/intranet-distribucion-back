@@ -20,6 +20,8 @@ public interface PedidoService {
 
     AprobacionPedidoResponseDTO aprobarRechazarPedido(Long idPedido, AprobacionPedidoRequestDTO request, String emailUsuario);
 
+    AprobacionPedidoResponseDTO obtenerAprobacion(Long idPedido);
+
     void eliminar(Long id);
 
     List<ClienteOpcionDTO> obtenerClientes();

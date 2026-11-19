@@ -25,4 +25,5 @@ public class PedidoResponseDTO {
     private String observacion;
     private BigDecimal total;
     private List<DetallePedidoResponseDTO> detalles;
+    private AprobacionPedidoResponseDTO aprobacion;
 }
