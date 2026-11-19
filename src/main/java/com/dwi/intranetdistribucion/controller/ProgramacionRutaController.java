@@ -30,8 +30,8 @@ public class ProgramacionRutaController {
 
     @PatchMapping("/{id}/estado")
     public ResponseEntity<ProgramacionRutaResponseDTO> actualizarEstado(
-            @PathVariable Integer id,
-            @RequestParam Short idEstado) {
+            @PathVariable("id") Integer id,
+            @RequestParam("idEstado") Short idEstado) {
         return ResponseEntity.ok(programacionRutaService.actualizarEstado(id, idEstado));
     }
 }

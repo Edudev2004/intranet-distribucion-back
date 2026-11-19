@@ -23,7 +23,7 @@ public class PedidoController {
     private final PedidoService pedidoService;
 
     @GetMapping
-    public ResponseEntity<List<PedidoResumenDTO>> listar(@RequestParam(required = false) Integer idEstado) {
+    public ResponseEntity<List<PedidoResumenDTO>> listar(@RequestParam(name = "idEstado", required = false) Integer idEstado) {
         return ResponseEntity.ok(pedidoService.obtenerTodos(idEstado));
     }
 
@@ -33,12 +33,12 @@ public class PedidoController {
     }
 
     @GetMapping("/productos")
-    public ResponseEntity<List<ProductoDisponibleDTO>> productos(@RequestParam Integer idAlmacen) {
+    public ResponseEntity<List<ProductoDisponibleDTO>> productos(@RequestParam("idAlmacen") Integer idAlmacen) {
         return ResponseEntity.ok(pedidoService.obtenerProductosDisponibles(idAlmacen));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PedidoResponseDTO> obtenerPorId(@PathVariable Long id) {
+    public ResponseEntity<PedidoResponseDTO> obtenerPorId(@PathVariable("id") Long id) {
         return ResponseEntity.ok(pedidoService.obtenerPorId(id));
     }
 
@@ -50,7 +50,7 @@ public class PedidoController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+    public ResponseEntity<Void> eliminar(@PathVariable("id") Long id) {
         pedidoService.eliminar(id);
         return ResponseEntity.noContent().build();
     }

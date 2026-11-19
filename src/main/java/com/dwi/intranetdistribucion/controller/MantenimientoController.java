@@ -22,7 +22,7 @@ public class MantenimientoController {
 
     @GetMapping
     public ResponseEntity<List<MantenimientoResponseDTO>> obtenerTodos(
-            @RequestParam(required = false) Integer idVehiculo) {
+            @RequestParam(name = "idVehiculo", required = false) Integer idVehiculo) {
         return ResponseEntity.ok(mantenimientoService.obtenerTodos(idVehiculo));
     }
 
@@ -37,7 +37,7 @@ public class MantenimientoController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<MantenimientoResponseDTO> obtenerPorId(@PathVariable Integer id) {
+    public ResponseEntity<MantenimientoResponseDTO> obtenerPorId(@PathVariable("id") Integer id) {
         return ResponseEntity.ok(mantenimientoService.obtenerPorId(id));
     }
 
@@ -47,13 +47,13 @@ public class MantenimientoController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MantenimientoResponseDTO> actualizar(@PathVariable Integer id,
+    public ResponseEntity<MantenimientoResponseDTO> actualizar(@PathVariable("id") Integer id,
                                                                @Valid @RequestBody MantenimientoRequestDTO request) {
         return ResponseEntity.ok(mantenimientoService.actualizar(id, request));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
+    public ResponseEntity<Void> eliminar(@PathVariable("id") Integer id) {
         mantenimientoService.eliminar(id);
         return ResponseEntity.noContent().build();
     }
