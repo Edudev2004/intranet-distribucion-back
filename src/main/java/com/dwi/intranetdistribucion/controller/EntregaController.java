@@ -20,14 +20,14 @@ public class EntregaController {
 
     @GetMapping("/programacion/{idProgramacion}")
     @PreAuthorize("hasAuthority('Entregas_ver')")
-    public ResponseEntity<List<EntregaResponseDTO>> listarPorProgramacion(@PathVariable Integer idProgramacion) {
+    public ResponseEntity<List<EntregaResponseDTO>> listarPorProgramacion(@PathVariable("idProgramacion") Integer idProgramacion) {
         return ResponseEntity.ok(entregaService.listarPorProgramacion(idProgramacion));
     }
 
     @PatchMapping("/{id}/estado")
     @PreAuthorize("hasAuthority('Entregas_actualizar')")
     public ResponseEntity<EntregaResponseDTO> actualizarEstado(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @Valid @RequestBody ActualizarEntregaRequestDTO request) {
         return ResponseEntity.ok(entregaService.actualizarEstadoEntrega(id, request));
     }

@@ -22,13 +22,13 @@ public class ClienteController {
 
     @GetMapping
     public ResponseEntity<List<ClienteResponseDTO>> listarTodos(
-            @RequestParam(required = false) String filtro,
-            @RequestParam(required = false, defaultValue = "true") Boolean soloActivos) {
+            @RequestParam(name = "filtro", required = false) String filtro,
+            @RequestParam(name = "soloActivos", required = false, defaultValue = "true") Boolean soloActivos) {
         return ResponseEntity.ok(clienteService.listarTodos(filtro, soloActivos));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ClienteResponseDTO> obtenerPorId(@PathVariable Integer id) {
+    public ResponseEntity<ClienteResponseDTO> obtenerPorId(@PathVariable("id") Integer id) {
         return ResponseEntity.ok(clienteService.obtenerPorId(id));
     }
 
@@ -39,21 +39,21 @@ public class ClienteController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ClienteResponseDTO> actualizar(
-            @PathVariable Integer id,
+            @PathVariable("id") Integer id,
             @Valid @RequestBody ClienteRequestDTO request) {
         return ResponseEntity.ok(clienteService.actualizar(id, request));
     }
 
     @PatchMapping("/{id}/estado")
     public ResponseEntity<Void> cambiarEstado(
-            @PathVariable Integer id,
-            @RequestParam Boolean activo) {
+            @PathVariable("id") Integer id,
+            @RequestParam("activo") Boolean activo) {
         clienteService.cambiarEstado(id, activo);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
+    public ResponseEntity<Void> eliminar(@PathVariable("id") Integer id) {
         clienteService.eliminar(id);
         return ResponseEntity.noContent().build();
     }
