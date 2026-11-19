@@ -94,6 +94,32 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
     List<PedidoResumenView> listarResumen(@Param("idEstado") Integer idEstado);
 
     @Query(value = """
+            SELECT p.id_pedido AS "idPedido",
+                   c.nombre_razon_social AS "cliente",
+                   a.nombre AS "almacen",
+                   CAST(p.id_estado_pedido AS integer) AS "idEstadoPedido",
+                   ep.nombre AS "estado",
+                   to_char(p.fecha_pedido AT TIME ZONE 'America/Lima', 'DD/MM/YYYY HH24:MI') AS "fechaPedido",
+                   COALESCE(SUM(dp.cantidad * dp.precio_unitario), 0) AS "total"
+            FROM pedido p
+            JOIN cliente c ON c.id_cliente = p.id_cliente
+            JOIN almacen a ON a.id_almacen = p.id_almacen
+            JOIN estado_pedido ep ON ep.id_estado_pedido = p.id_estado_pedido
+            LEFT JOIN detalle_pedido dp ON dp.id_pedido = p.id_pedido
+            WHERE (CAST(:idEstado AS integer) IS NULL OR p.id_estado_pedido = :idEstado)
+              AND (CAST(:idCliente AS integer) IS NULL OR p.id_cliente = :idCliente)
+              AND (CAST(:fechaInicio AS date) IS NULL OR CAST(p.fecha_pedido AT TIME ZONE 'America/Lima' AS date) >= :fechaInicio)
+              AND (CAST(:fechaFin AS date) IS NULL OR CAST(p.fecha_pedido AT TIME ZONE 'America/Lima' AS date) <= :fechaFin)
+            GROUP BY p.id_pedido, c.nombre_razon_social, a.nombre, p.id_estado_pedido, ep.nombre, p.fecha_pedido
+            ORDER BY p.id_pedido DESC
+            """, nativeQuery = true)
+    List<PedidoResumenView> obtenerReportePedidos(
+            @Param("fechaInicio") java.time.LocalDate fechaInicio,
+            @Param("fechaFin") java.time.LocalDate fechaFin,
+            @Param("idEstado") Integer idEstado,
+            @Param("idCliente") Integer idCliente);
+
+    @Query(value = """
             SELECT c.id_cliente AS "idCliente",
                    c.nombre_razon_social AS "nombre",
                    c.numero_documento AS "documento"
