@@ -57,6 +57,7 @@ class SedeControllerTest {
                 .nombreResponsable("Ana Mendoza")
                 .correoResponsable("amendoza@distribucion.com")
                 .activo(true)
+                .fotoUrl("https://example.com/foto.jpg")
                 .totalUsuarios(12L)
                 .totalAlmacenes(3L)
                 .build();

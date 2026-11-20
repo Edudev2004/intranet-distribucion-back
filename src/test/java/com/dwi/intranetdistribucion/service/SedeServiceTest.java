@@ -64,6 +64,7 @@ class SedeServiceTest {
                 .direccion("Av. Los Pinos 456, Chiclayo")
                 .responsable(responsableEjemplo)
                 .activo(true)
+                .fotoUrl("https://example.com/foto.jpg")
                 .build();
     }
 
