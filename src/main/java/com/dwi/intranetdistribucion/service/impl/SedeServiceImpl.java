@@ -71,6 +71,7 @@ public class SedeServiceImpl implements SedeService {
                 .direccion(direccion)
                 .responsable(responsable)
                 .activo(request.getActivo() == null ? Boolean.TRUE : request.getActivo())
+                .fotoUrl(request.getFotoUrl())
                 .build();
 
         Sede guardada = sedeRepository.save(sede);
@@ -96,6 +97,9 @@ public class SedeServiceImpl implements SedeService {
         sede.setNombre(nombre);
         sede.setDireccion(direccion);
         sede.setResponsable(responsable);
+        if (request.getFotoUrl() != null) {
+            sede.setFotoUrl(request.getFotoUrl());
+        }
         if (request.getActivo() != null) {
             sede.setActivo(request.getActivo());
         }
@@ -192,6 +196,7 @@ public class SedeServiceImpl implements SedeService {
                 .nombreResponsable(r != null ? (r.getNombres() + " " + r.getApellidos()) : null)
                 .correoResponsable(r != null ? r.getCorreo() : null)
                 .activo(s.getActivo())
+                .fotoUrl(s.getFotoUrl())
                 .totalUsuarios(totalUsuarios)
                 .totalAlmacenes(totalAlmacenes)
                 .build();

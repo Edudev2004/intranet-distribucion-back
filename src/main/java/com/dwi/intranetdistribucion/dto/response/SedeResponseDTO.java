@@ -15,6 +15,7 @@ public class SedeResponseDTO {
     private String nombreResponsable;
     private String correoResponsable;
     private Boolean activo;
+    private String fotoUrl;
     private Long totalUsuarios;
     private Long totalAlmacenes;
 }

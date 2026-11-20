@@ -21,4 +21,6 @@ public class SedeRequestDTO {
     private Integer idResponsable;
 
     private Boolean activo;
+
+    private String fotoUrl;
 }

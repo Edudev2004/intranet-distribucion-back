@@ -34,6 +34,9 @@ public class Sede {
     @Column(name = "activo", nullable = false)
     private Boolean activo;
 
+    @Column(name = "foto_url")
+    private String fotoUrl;
+
     @PrePersist
     protected void onCreate() {
         if (this.activo == null) {
