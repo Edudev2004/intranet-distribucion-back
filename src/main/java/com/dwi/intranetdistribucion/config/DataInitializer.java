@@ -82,42 +82,12 @@ public class DataInitializer implements CommandLineRunner {
         crearRolSiNoExiste("CONDUCTOR", "Acceso a rutas asignadas e incidencias", List.of("LOGISTICA_RUTAS"));
         crearRolSiNoExiste("CLIENTE", "Generación y consulta de pedidos", List.of("PEDIDOS_CREAR"));
 
-        // 5. Inicializar Usuario Admin Inicial
-        String adminEmail = "admin@distribucion.com";
-        if (!usuarioRepository.existsByCorreoIgnoreCase(adminEmail)) {
-            Usuario admin = Usuario.builder()
-                    .nombres("Administrador")
-                    .apellidos("Sistema")
-                    .username("admin")
-                    .correo(adminEmail)
-                    .passwordHash(passwordEncoder.encode("admin"))
-                    .sede(sedeDefault)
-                    .activo(true)
-                    .intentosFallidos((short) 0)
-                    .bloqueado(false)
-                    .rol(rolAdmin)
-                    .build();
-
-            usuarioRepository.save(admin);
-            System.out.println("=================================================");
-            System.out.println(">>> USUARIO ADMINISTRADOR INICIAL CREADO EN BD <<<");
-            System.out.println(">>> Email:    " + adminEmail);
-            System.out.println(">>> Password: admin");
-            System.out.println(">>> Rol:      ADMIN");
-            System.out.println(">>> Sede:     " + sedeDefault.getNombre());
-            System.out.println("=================================================");
-        } else {
-            // Si el admin inicial fue bloqueado en pruebas previas, restaurar su estado al arrancar
-            usuarioRepository.findByCorreoIgnoreCase(adminEmail).ifPresent(admin -> {
-                if (Boolean.TRUE.equals(admin.getEsBloqueado()) || (admin.getIntentosFallidos() != null && admin.getIntentosFallidos() > 0)) {
-                    admin.setBloqueado(false);
-                    admin.setIntentosFallidos((short) 0);
-                    admin.setFechaBloqueo(null);
-                    usuarioRepository.save(admin);
-                    System.out.println(">>> Usuario " + adminEmail + " desbloqueado automáticamente para continuar pruebas <<<");
-                }
-            });
-        }
+        // 5. Inicializar Usuarios Demo del Sistema para todos los roles
+        crearUsuarioDemoSiNoExiste("admin@distribucion.com", "admin", "admin", "Administrador", "Sistema", "ADMIN", sedeDefault);
+        crearUsuarioDemoSiNoExiste("supervisor@distribucion.com", "admin", "supervisor", "Carlos", "Supervisor", "SUPERVISOR", sedeDefault);
+        crearUsuarioDemoSiNoExiste("almacenero@distribucion.com", "admin", "almacenero", "Jorge", "Almacenero", "ALMACENERO", sedeDefault);
+        crearUsuarioDemoSiNoExiste("conductor@distribucion.com", "admin", "conductor", "Marcos", "Conductor", "CONDUCTOR", sedeDefault);
+        crearUsuarioDemoSiNoExiste("cliente@distribucion.com", "admin", "cliente", "Comercial", "Cliente", "CLIENTE", sedeDefault);
 
         // 6. Inicializar Tipos de Movimiento de Inventario
         crearTipoMovimientoSiNoExiste("ENTRADA_COMPRA", 'E');
@@ -211,6 +181,36 @@ public class DataInitializer implements CommandLineRunner {
                     .descripcion(descripcion)
                     .permisos(permisos)
                     .build());
+        }
+    }
+
+    private void crearUsuarioDemoSiNoExiste(String correo, String password, String username, String nombres, String apellidos, String nombreRol, Sede sede) {
+        if (!usuarioRepository.existsByCorreoIgnoreCase(correo) && !usuarioRepository.existsByUsernameIgnoreCase(username)) {
+            Rol rol = rolRepository.findByNombre(nombreRol).orElse(null);
+            Usuario usuario = Usuario.builder()
+                    .nombres(nombres)
+                    .apellidos(apellidos)
+                    .username(username)
+                    .correo(correo)
+                    .passwordHash(passwordEncoder.encode(password))
+                    .sede(sede)
+                    .activo(true)
+                    .intentosFallidos((short) 0)
+                    .bloqueado(false)
+                    .rol(rol)
+                    .build();
+
+            usuarioRepository.save(usuario);
+            System.out.println(">>> Usuario Demo Inicial Creado: " + correo + " (Rol: " + nombreRol + ") <<<");
+        } else {
+            usuarioRepository.findByCorreoIgnoreCase(correo).ifPresent(u -> {
+                if (Boolean.TRUE.equals(u.getEsBloqueado()) || (u.getIntentosFallidos() != null && u.getIntentosFallidos() > 0)) {
+                    u.setBloqueado(false);
+                    u.setIntentosFallidos((short) 0);
+                    u.setFechaBloqueo(null);
+                    usuarioRepository.save(u);
+                }
+            });
         }
     }
 }
